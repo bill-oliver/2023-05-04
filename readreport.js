@@ -1,3 +1,5 @@
+"use strict";
+
 var fs = require('fs');
 
 const tokens = [ "HHCC Accession No.",
@@ -49,8 +51,6 @@ function findSlice( sReport, sToken1, sToken2 ) {
 	
 	console.log( sToken1, sToken1.length, sToken2, iToken1, iToken2, ":" );
 	console.log( "Slice: ***", sSlice, "***" );
-	console.log( "Length:", sSlice.length );
-	console.log( "" );
 
 	//
 	//  CLEAN IT UP 
@@ -62,53 +62,56 @@ function findSlice( sReport, sToken1, sToken2 ) {
 
 	while( sSlice.charCodeAt(sSlice.length-1) <= 32 && sSlice.length > 0 ){
 //		console.log( sSlice.charCodeAt(sSlice.length-1));
-		sSlice = sSlice.substring(0, sSlice.length-2 );
+		sSlice = sSlice.substring(0, sSlice.length-1 );
 	}
 	
-/* 	console.log( sToken1, ":" );
-	console.log( "Slice: ***", sSlice, "***" );
+	console.log( "trimed Slice: ***", sSlice, "***" );
 	console.log( "Length:", sSlice.length );
 	console.log( "" );
- */	return sSlice;
+	return sSlice;
 }
 
-var sSlice;
-var sReport;
-var fnReport;
+function readTokens( sFileName, iToken = -1 ){
+	var sSlice;
+	var sReport;
 
-//
-//  Read all the report files in the directory
-//
-var a = fs.readdirSync("reports");
+	//
+	// Read the word document
+	//
+	sReport = fs.readFileSync( sFileName, {encoding: 'utf8' } );
 
-//
-// One report
-//
-fnReport = a[1]
-sReport = fs.readFileSync( "reports/" + fnReport, {encoding: 'utf8' } );
+	console.log( "read ", sReport.length, "bytes from ",  sFileName );
 
-console.log( "read ", sReport.length, "bytes from ",  fnReport );
+	//
+	//  Trim off the garbage at the top 
+	//
+	const sHeader = "Research Reports \rFounding Collection, HVACR Heritage Centre Canada";
+	sReport = sReport.slice( sReport.indexOf( sHeader ), sReport.length );
 
-//
-//  Trim off the garbage at the top of the word doc
-//
-const sHeader = "Research Reports \rFounding Collection, HVACR Heritage Centre Canada";
-sReport = sReport.slice( sReport.indexOf( sHeader ), sReport.length );
-
-console.log( "trimed ", sReport.length, "bytes from ",  fnReport );
-console.log( sReport.slice( 0, 10) );
+	console.log( "trimed length", sReport.length );
 
 
-/* for( var i=0;  i<tokens.length-1; i++ ){
-//	console.log( tokens1[i], tokens1[i+1]);
-	sSlice = findSlice( sReport, tokens[i], tokens[i+1] );
+	/* for( var i=0;  i<tokens.length-1; i++ ){
+	//	console.log( tokens1[i], tokens1[i+1]);
+		sSlice = findSlice( sReport, tokens[i], tokens[i+1] );
+	}
+	 */	
+	if( iToken >= 0 ){
+	sSlice = findSlice( sReport, tokens[iToken], tokens[iToken+1] );
+	} 
+	else {
+		//
+		// Read all the tokens in the file
+		//
+		for( var i=2;  i<tokens.length-1; i++ ){
+		//	console.log( tokens1[i], tokens1[i+1]);
+			sSlice = findSlice( sReport, tokens[i], tokens[i+1] );
+		}
+	}
 }
- */	
-var iToken = 33;
-sSlice = findSlice( sReport, tokens[iToken], tokens[iToken+1] );
 
-/*  for( var i=2;  i<tokens.length-1; i++ ){
-//	console.log( tokens1[i], tokens1[i+1]);
-	sSlice = findSlice( sReport, tokens[i], tokens[i+1] );
-}
- */	
+//
+// test it 
+//
+readTokens( "../Res. Rpts. Founding Collection 2006.060.doc", 8 );
+

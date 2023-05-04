@@ -44,6 +44,35 @@ const tokens = [ "HHCC Accession No.",
 				"Related Reports",
 				"\f" ];
 
+function cleanString( sIn ){
+	var sOut = "";
+	
+	for( var i = 0; i < sIn.length; i++ ){
+		var sChar = sIn.charAt( i );
+ 		switch( sChar ) {
+			case '\r':
+			sOut += '\n';
+			break;
+			
+			case '\x92':
+			sOut += "'";
+			break;
+			
+			default:
+			if( sChar > '\x7e' ){
+				console.log( "***** ", sChar.charCodeAt( 0 ), "at postion", i );
+			}
+			sOut += sChar;
+		}
+	}
+	console.log( "sIn", sIn );
+	console.log( "sOut", sOut );
+	
+	
+	return sOut;
+}
+
+
 function findSlice( sReport, sToken1, sToken2 ) {
 	var iToken1 = sReport.indexOf( sToken1 ) + sToken1.length;
 	var iToken2 = sReport.indexOf( sToken2, iToken1 );
@@ -66,6 +95,13 @@ function findSlice( sReport, sToken1, sToken2 ) {
 	}
 	
 	console.log( "trimed Slice: ***", sSlice, "***" );
+	console.log( "Length:", sSlice.length );
+	console.log( "" );
+	
+	
+	sSlice = cleanString( sSlice );
+	
+	console.log( "Cleaned Slice: ***", sSlice, "***" );
 	console.log( "Length:", sSlice.length );
 	console.log( "" );
 	return sSlice;
@@ -113,5 +149,5 @@ function readTokens( sFileName, iToken = -1 ){
 //
 // test it 
 //
-readTokens( "../Res. Rpts. Founding Collection 2006.060.doc", 8 );
+readTokens( "../Res. Rpts. Founding Collection 2006.060.doc", 4 );
 

@@ -2,6 +2,7 @@
 "AccessionNo"	TEXT"Classification"	TEXT
 "LastModified"	TEXT
 "Group"	TEXT
+"Description"	TEXT
 "FilmImage"	TEXT
 "DigitalImage"	TEXT
 "Make"	TEXT

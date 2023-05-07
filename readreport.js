@@ -155,7 +155,7 @@ function findSlice( sReport, sToken1, sToken2 ) {
 	var sSlice = sReport.slice( iToken1, iToken2 );
 	
 	console.log( sToken1, sToken1.length, sToken2, iToken1, iToken2, ":" );
-	// console.log( "Slice: ***", sSlice, "***" );
+	console.log( "Slice: ***", sSlice, "***" );
 
 	//
 	//  CLEAN IT UP 
@@ -168,32 +168,15 @@ function findSlice( sReport, sToken1, sToken2 ) {
 	sSlice = cleanString( sSlice );
 	
 	console.log( "Cleaned Slice: ***", sSlice, "***" );
-	console.log( "Length:", sSlice.length );
+	// console.log( "Length:", sSlice.length );
 	console.log( "" );
 	return sSlice;
 }
 
 //
 //  
-function readTokens( sFileName, iToken = -1 ){
+function readTokens( sReport, iToken = -1 ){
 	var sSlice;
-	var sReport;
-
-	//
-	// Read the word document
-	//
-	sReport = fs.readFileSync( sFileName, {encoding: 'utf8' } );
-
-	console.log( "read ", sReport.length, "bytes from ",  sFileName );
-
-	//
-	//  Trim off the garbage at the top 
-	//
-	const sHeader = "Research Reports \rFounding Collection, HVACR Heritage Centre Canada";
-	sReport = sReport.slice( sReport.indexOf( sHeader ), sReport.length );
-
-	console.log( "trimed length", sReport.length );
-
 
 	/* for( var i=0;  i<tokens.length-1; i++ ){
 	//	console.log( tokens1[i], tokens1[i+1]);
@@ -207,18 +190,55 @@ function readTokens( sFileName, iToken = -1 ){
 		//
 		// Read all the tokens in the file
 		//
-		for( var i=2;  i<tokens.length-1; i++ ){
+		for( var i=2;  i<dataFields.tokens.length-1; i++ ){
 		//	console.log( tokens1[i], tokens1[i+1]);
 			sSlice = findSlice( sReport, dataFields.tokens[i], dataFields.tokens[i+1] );
 		}
 	}
 }
 
+function updateReportDB( dbReports, sAccessionNo ) {
+	var sFileName = "../reports/Res. Rpts. Founding Collection " + sAccessionNo + ".doc";
+	
+	//
+	// Read the word document
+	//
+	var sReport = fs.readFileSync( sFileName, {encoding: 'utf8' } );
+
+	console.log( "read ", sReport.length, "bytes from ",  sFileName );
+
+	//
+	//  Trim off the garbage at the top 
+	//
+	const sHeader = "Research Reports \rFounding Collection, HVACR Heritage Centre Canada";
+	sReport = sReport.slice( sReport.indexOf( sHeader ), sReport.length );
+	
+	readTokens( sReport, 4 );
+}
+
+function dbCallback( err, row ){
+	if( err ){
+		throw err;
+	}
+	
+	updateReportDB( db, row.AccessionNo );
+}
+	
+
+const sqlite3 = require('sqlite3').verbose();
+let db = new sqlite3.Database('reports.sqlite')
+let sql = "SELECT DISTINCT AccessionNo FROM report ORDER BY AccessionNo";
+
+db.each( sql, [], dbCallback );
+
+db.close();
+
+
 //
 // test it 
 //
 
-readTokens( "../Res. Rpts. Founding Collection 2003.001.doc", 16 );
+// updateReportDB( db, "2003.001" );
 // for( var i=1;  i<dataFields.tokens.length-1; i++ ){
 	// console.log( dataFields.tokens[i], dataFields.fields[i]);
 // }

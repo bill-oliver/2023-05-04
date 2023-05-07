@@ -49,24 +49,22 @@ function cleanString( sIn ){
 	
 	for( var i = 0; i < sIn.length; i++ ){
 		var sChar = sIn.charAt( i );
- 		switch( sChar ) {
-			case '\r':
+		if ( sChar == '\r' ){
 			sOut += '\n';
-			break;
-			
-			case '\x92':
+		} 
+		else if( sChar.charCodeAt( 0 ) == 65533 ) {
 			sOut += "'";
-			break;
-			
-			default:
-			if( sChar > '\x7e' ){
+		}
+		else if( sChar > '\x7e' ){
 				console.log( "***** ", sChar.charCodeAt( 0 ), "at postion", i );
-			}
+				sOut +=  '@';
+		} 
+		else {
 			sOut += sChar;
 		}
 	}
-	console.log( "sIn", sIn );
-	console.log( "sOut", sOut );
+	// console.log( "sIn", sIn );
+	// console.log( "sOut", sOut );
 	
 	
 	return sOut;
@@ -94,9 +92,9 @@ function findSlice( sReport, sToken1, sToken2 ) {
 		sSlice = sSlice.substring(0, sSlice.length-1 );
 	}
 	
-	console.log( "trimed Slice: ***", sSlice, "***" );
-	console.log( "Length:", sSlice.length );
-	console.log( "" );
+	// console.log( "trimed Slice: ***", sSlice, "***" );
+	// console.log( "Length:", sSlice.length );
+	// console.log( "" );
 	
 	
 	sSlice = cleanString( sSlice );
@@ -149,5 +147,5 @@ function readTokens( sFileName, iToken = -1 ){
 //
 // test it 
 //
-readTokens( "../Res. Rpts. Founding Collection 2006.060.doc", 4 );
+readTokens( "../Res. Rpts. Founding Collection 2003.001.doc" );
 

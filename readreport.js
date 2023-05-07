@@ -117,8 +117,8 @@ function cleanString( sIn ){
 	// 
 	// Fix up new lines and other stuff word has embeded
 	//
-	for( var i = 0; i < sIn.length; i++ ){
-		var sChar = sIn.charAt( i );
+	for( let i = 0; i < sIn.length; i++ ){
+		let sChar = sIn.charAt( i );
 		if ( sChar == '\r' ){
 			sOut += '\n';           	// return should be new line
 		} 
@@ -150,9 +150,9 @@ function cleanString( sIn ){
 //  sToken2 - terminating token (heading for next block of text)
 //
 function findSlice( sReport, sToken1, sToken2 ) {
-	var iToken1 = sReport.indexOf( sToken1 ) + sToken1.length;
-	var iToken2 = sReport.indexOf( sToken2, iToken1 );
-	var sSlice = sReport.slice( iToken1, iToken2 );
+	let iToken1 = sReport.indexOf( sToken1 ) + sToken1.length;
+	let iToken2 = sReport.indexOf( sToken2, iToken1 );
+	let sSlice = sReport.slice( iToken1, iToken2 );
 	
 	console.log( sToken1, sToken1.length, sToken2, iToken1, iToken2, ":" );
 	console.log( "Slice: ***", sSlice, "***" );
@@ -176,9 +176,9 @@ function findSlice( sReport, sToken1, sToken2 ) {
 //
 //  
 function readTokens( sReport, iToken = -1 ){
-	var sSlice;
+	let sSlice;
 
-	/* for( var i=0;  i<tokens.length-1; i++ ){
+	/* for( let i=0;  i<tokens.length-1; i++ ){
 	//	console.log( tokens1[i], tokens1[i+1]);
 		sSlice = findSlice( sReport, tokens[i], tokens[i+1] );
 	}
@@ -190,7 +190,7 @@ function readTokens( sReport, iToken = -1 ){
 		//
 		// Read all the tokens in the file
 		//
-		for( var i=2;  i<dataFields.tokens.length-1; i++ ){
+		for( let i=2;  i<dataFields.tokens.length-1; i++ ){
 		//	console.log( tokens1[i], tokens1[i+1]);
 			sSlice = findSlice( sReport, dataFields.tokens[i], dataFields.tokens[i+1] );
 		}
@@ -198,12 +198,12 @@ function readTokens( sReport, iToken = -1 ){
 }
 
 function updateReportDB( dbReports, sAccessionNo ) {
-	var sFileName = "../reports/Res. Rpts. Founding Collection " + sAccessionNo + ".doc";
+	let sFileName = "../reports/Res. Rpts. Founding Collection " + sAccessionNo + ".doc";
 	
 	//
 	// Read the word document
 	//
-	var sReport = fs.readFileSync( sFileName, {encoding: 'utf8' } );
+	let sReport = fs.readFileSync( sFileName, {encoding: 'utf8' } );
 
 	console.log( "read ", sReport.length, "bytes from ",  sFileName );
 
@@ -211,9 +211,9 @@ function updateReportDB( dbReports, sAccessionNo ) {
 	//  Trim off the garbage at the top 
 	//
 	const sHeader = "Research Reports \rFounding Collection, HVACR Heritage Centre Canada";
-	sReport = sReport.slice( sReport.indexOf( sHeader ), sReport.length );
+	let iOffset = sReport.indexOf( sHeader );
 	
-	readTokens( sReport, 4 );
+	readTokens( sReport.slice( sReport.indexOf( sHeader ) ), 4 );  // Test one token only
 }
 
 function dbCallback( err, row ){
@@ -234,12 +234,8 @@ db.each( sql, [], dbCallback );
 db.close();
 
 
-//
-// test it 
-//
-
 // updateReportDB( db, "2003.001" );
-// for( var i=1;  i<dataFields.tokens.length-1; i++ ){
+// for( let i=1;  i<dataFields.tokens.length-1; i++ ){
 	// console.log( dataFields.tokens[i], dataFields.fields[i]);
 // }
 

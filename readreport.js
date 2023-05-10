@@ -156,6 +156,10 @@ function findSlice( sReport, sToken1, sToken2 ) {
 	
 	console.log( sToken1, sToken1.length, sToken2, iToken1, iToken2, ":" );
 	console.log( "Slice: ***", sSlice, "***" );
+	
+	if( iToken1 < 0 || iToken2 < 0 ){
+		throw new Error( "token not found " );      //  **** ERROR
+	}
 
 	//
 	//  CLEAN IT UP 
@@ -229,7 +233,13 @@ const sqlite3 = require('sqlite3').verbose();
 let db = new sqlite3.Database('reports.sqlite')
 let sql = "SELECT DISTINCT AccessionNo FROM report ORDER BY AccessionNo";
 
-db.each( sql, [], dbCallback );
+try {
+	db.each( sql, [], dbCallback );
+}
+catch( e ) {
+	console.error( e.name );
+	console.error( e.message );
+}
 
 db.close();
 

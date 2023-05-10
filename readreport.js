@@ -126,8 +126,9 @@ function cleanString( sIn ){
 			sOut += "'";				//  This seems to be a quote in word
 		}
 		else if( sChar > '\x7e' ){		//  Unexpected non-ascii character
-				console.log( "***** ", sChar.charCodeAt( 0 ), "at postion", i );
-				sOut +=  '@';
+			throw new Error( "***** ", sChar.charCodeAt( 0 ), "at postion", i, "\n",
+							sIn.slice( 0, 30 ), "\n",
+							sOut.slice( -10 ), "****", sIn.slice( i, i+10) );
 		} 
 		else {
 			sOut += sChar;
@@ -154,11 +155,14 @@ function findSlice( sReport, sToken1, sToken2 ) {
 	let iToken2 = sReport.indexOf( sToken2, iToken1 );
 	let sSlice = sReport.slice( iToken1, iToken2 );
 	
-	console.log( sToken1, sToken1.length, sToken2, iToken1, iToken2, ":" );
-	console.log( "Slice: ***", sSlice, "***" );
+	// console.log( sToken1, sToken1.length, sToken2, iToken1, iToken2, ":" );
+	// console.log( "Slice: ***", sSlice, "***" );
 	
-	if( iToken1 < 0 || iToken2 < 0 ){
-		throw new Error( "token not found " );      //  **** ERROR
+	if( iToken1 < 0 ){
+		throw new Error( "Token " + sToken1 + " not found " );      //  **** ERROR ****
+	}
+	else if( iToken2 < 0 ){
+		throw new Error( "Token " + sToken2 + " not found " );      //  **** ERROR ****
 	}
 
 	//
@@ -171,9 +175,9 @@ function findSlice( sReport, sToken1, sToken2 ) {
 	
 	sSlice = cleanString( sSlice );
 	
-	console.log( "Cleaned Slice: ***", sSlice, "***" );
+	// console.log( sToken1, "***", sSlice, "***" );
 	// console.log( "Length:", sSlice.length );
-	console.log( "" );
+	// console.log( "" );
 	return sSlice;
 }
 
@@ -188,7 +192,7 @@ function readTokens( sReport, iToken = -1 ){
 	}
 	 */	
 	if( iToken >= 0 ){
-	sSlice = findSlice( sReport, dataFields.tokens[iToken], dataFields.tokens[iToken+1] );
+		sSlice = findSlice( sReport, dataFields.tokens[iToken], dataFields.tokens[iToken+1] );
 	} 
 	else {
 		//
@@ -209,15 +213,18 @@ function updateReportDB( dbReports, sAccessionNo ) {
 	//
 	let sReport = fs.readFileSync( sFileName, {encoding: 'utf8' } );
 
-	console.log( "read ", sReport.length, "bytes from ",  sFileName );
+	console.log( "Processing: ",  sFileName );
 
 	//
 	//  Trim off the garbage at the top 
 	//
-	const sHeader = "Research Reports \rFounding Collection, HVACR Heritage Centre Canada";
+	// const sHeader = "Research Reports \rFounding Collection, HVACR Heritage Centre Canada";
+	const sHeader = "Research Reports";
 	let iOffset = sReport.indexOf( sHeader );
-	
-	readTokens( sReport.slice( sReport.indexOf( sHeader ) ), 4 );  // Test one token only
+	console.log( "Header offset", iOffset );
+
+	// readTokens( sReport.slice( iOffset ), 8 );  	// Test one token only
+	readTokens( sReport.slice( iOffset ) );  		// All tokens
 }
 
 function dbCallback( err, row ){

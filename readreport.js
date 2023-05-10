@@ -96,7 +96,7 @@ const dataFields = {
 //  cleanString - function
 //  -----------
 //
-//  Cleans up the block of text retreived by findSlice
+//  Cleans up the block of text retrieved by findSlice
 //
 function cleanString( sIn ){
 	var sOut = "";
@@ -122,8 +122,11 @@ function cleanString( sIn ){
 		if ( sChar == '\r' ){
 			sOut += '\n';           	// return should be new line
 		} 
+		else if( sChar == "'" ) {
+			sOut += "''";				//  Need to double up on quotes for SQL string
+		}
 		else if( sChar.charCodeAt( 0 ) == 65533 ) {
-			sOut += "'";				//  This seems to be a quote in word
+			sOut += "''";				//  This seems to be a quote in word
 		}
 		else if( sChar > '\x7e' ){		//  Unexpected non-ascii character
 			throw new Error( "***** Unexpected char " + sChar.charCodeAt( 0 ) 
@@ -186,11 +189,12 @@ function findSlice( sReport, sToken1, sToken2 ) {
 //
 //  returns the block of text corresponding to tokens in the file
 //
+//  dbReports - reports database object 
 //  sReport - string containing report text
 //  iToken - index (in dataFields) of token to be found, 
 //           if omitted all tokens are retreived
 //
-function readTokens( sReport, iToken = -1 ){
+function readTokens( dbReports, sAccessionNo, sReport, iToken = -1 ){
 	let sSlice;
 
 	/* for( let i=0;  i<tokens.length-1; i++ ){
@@ -198,8 +202,10 @@ function readTokens( sReport, iToken = -1 ){
 		sSlice = findSlice( sReport, tokens[i], tokens[i+1] );
 	}
 	 */	
+	let sSQL = "UPDATE report SET ";
 	if( iToken >= 0 ){
 		sSlice = findSlice( sReport, dataFields.tokens[iToken], dataFields.tokens[iToken+1] );
+		sSQL += dataFields.fields[ iToken ] + "='" + sSlice + "',";
 	} 
 	else {
 		//
@@ -208,8 +214,20 @@ function readTokens( sReport, iToken = -1 ){
 		for( let i=2;  i<dataFields.tokens.length-1; i++ ){
 		//	console.log( tokens1[i], tokens1[i+1]);
 			sSlice = findSlice( sReport, dataFields.tokens[i], dataFields.tokens[i+1] );
+			sSQL += " " + dataFields.fields[ i ] + "='" + sSlice + "',";
 		}
 	}
+	
+	sSQL = sSQL.slice( 0, sSQL.length - 1 );   // REMOVE TERMINATING ","
+	sSQL += " WHERE AccessionNo = " + sAccessionNo + ";";
+	
+	console.log( "SQL:", sSQL, "\n\n\n" );
+	
+	db.run( sSQL, [], function(err) {
+		if (err) {
+			throw(err);
+		}
+	} );
 }
 
 //
@@ -219,7 +237,7 @@ function readTokens( sReport, iToken = -1 ){
 //  Processes a research report word file.
 //
 //  dbReports - reports database object 
-//  sAccessionNo - the "Accession number" identifying the reprot to be processed (e.g. "2003.001")
+//  sAccessionNo - the "Accession number" identifying the report to be processed (e.g. "2003.001")
 //
 function updateReportDB( dbReports, sAccessionNo ) {
 	let sFileName = "../reports/Res. Rpts. Founding Collection " + sAccessionNo + ".doc";
@@ -229,18 +247,19 @@ function updateReportDB( dbReports, sAccessionNo ) {
 	//
 	let sReport = fs.readFileSync( sFileName, {encoding: 'utf8' } );
 
-	console.log( "Processing: ",  sFileName );
+	console.log( "\nProcessing: ",  sFileName );
 
 	//
 	//  Trim off the garbage at the top 
 	//
-	// const sHeader = "Research Reports \rFounding Collection, HVACR Heritage Centre Canada";
 	const sHeader = "Research Reports";
 	let iOffset = sReport.indexOf( sHeader );
-	console.log( "Header offset", iOffset );
+	// console.log( "Header offset", iOffset );
 
-	// readTokens( sReport.slice( iOffset ), 8 );  	// Test one token only
-	readTokens( sReport.slice( iOffset ) );  		// All tokens
+	readTokens( dbReports, sAccessionNo, 
+	            sReport.slice( iOffset ), 4 );  	// Test one token only
+	// readTokens( dbReports, sAccessionNo, 
+	            // sReport.slice( iOffset ) );  		// All tokens
 }
 
 //
@@ -266,7 +285,8 @@ let db = new sqlite3.Database('reports.sqlite')
 let sql = "SELECT DISTINCT AccessionNo FROM report ORDER BY AccessionNo";
 
 try {
-	db.each( sql, [], dbCallback );
+	// db.each( sql, [], dbCallback );
+	updateReportDB( db, "2006.002" );  // *****TEST ONE REPORT
 }
 catch( e ) {
 	console.error( e.name );

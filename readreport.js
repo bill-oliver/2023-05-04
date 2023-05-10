@@ -52,7 +52,7 @@ const dataFields = {
 		"AccessionNo",
 		"Classification",
 		"LastModified",
-		"Group",
+		"Grp",
 		"Description",
 		"FilmImage",
 		"DigitalImage",
@@ -209,7 +209,7 @@ function readTokens( dbReports, sAccessionNo, sReport, iToken = -1 ){
 	} 
 	else {
 		//
-		// Read all the tokens in the file
+		// Read all the tokens in the file (skip the accession no and class code)
 		//
 		for( let i=2;  i<dataFields.tokens.length-1; i++ ){
 		//	console.log( tokens1[i], tokens1[i+1]);
@@ -256,10 +256,10 @@ function updateReportDB( dbReports, sAccessionNo ) {
 	let iOffset = sReport.indexOf( sHeader );
 	// console.log( "Header offset", iOffset );
 
-	readTokens( dbReports, sAccessionNo, 
-	            sReport.slice( iOffset ), 4 );  	// Test one token only
 	// readTokens( dbReports, sAccessionNo, 
-	            // sReport.slice( iOffset ) );  		// All tokens
+	            // sReport.slice( iOffset ), 4 );  	// Test one token only
+	readTokens( dbReports, sAccessionNo, 
+	            sReport.slice( iOffset ) );  		// All tokens
 }
 
 //
@@ -285,8 +285,8 @@ let db = new sqlite3.Database('reports.sqlite')
 let sql = "SELECT DISTINCT AccessionNo FROM report ORDER BY AccessionNo";
 
 try {
-	// db.each( sql, [], dbCallback );
-	updateReportDB( db, "2006.002" );  // *****TEST ONE REPORT
+	db.each( sql, [], dbCallback );			// Process all items in db
+	// updateReportDB( db, "2003.001" );	// *****TEST ONE REPORT
 }
 catch( e ) {
 	console.error( e.name );

@@ -126,9 +126,8 @@ function cleanString( sIn ){
 			sOut += "'";				//  This seems to be a quote in word
 		}
 		else if( sChar > '\x7e' ){		//  Unexpected non-ascii character
-			throw new Error( "***** ", sChar.charCodeAt( 0 ), "at postion", i, "\n",
-							sIn.slice( 0, 30 ), "\n",
-							sOut.slice( -10 ), "****", sIn.slice( i, i+10) );
+			throw new Error( "***** Unexpected char " + sChar.charCodeAt( 0 ) 
+							+ " at postion " + i + " in slice: \n" + sIn );
 		} 
 		else {
 			sOut += sChar;
@@ -144,7 +143,7 @@ function cleanString( sIn ){
 //  findSlice - function
 //  ---------
 //
-//  Returns the block of text between to heding tokens in the Report
+//  Returns the block of text between to heading tokens in the Report
 //
 //  sReport - string containing report text
 //  sToken1 - leading token (heading for data to be retreived
@@ -182,7 +181,15 @@ function findSlice( sReport, sToken1, sToken2 ) {
 }
 
 //
-//  
+//  readTokens - function
+//  ----------
+//
+//  returns the block of text corresponding to tokens in the file
+//
+//  sReport - string containing report text
+//  iToken - index (in dataFields) of token to be found, 
+//           if omitted all tokens are retreived
+//
 function readTokens( sReport, iToken = -1 ){
 	let sSlice;
 
@@ -205,6 +212,15 @@ function readTokens( sReport, iToken = -1 ){
 	}
 }
 
+//
+//  updateReportDB - function
+//  --------------
+//
+//  Processes a research report word file.
+//
+//  dbReports - reports database object 
+//  sAccessionNo - the "Accession number" identifying the reprot to be processed (e.g. "2003.001")
+//
 function updateReportDB( dbReports, sAccessionNo ) {
 	let sFileName = "../reports/Res. Rpts. Founding Collection " + sAccessionNo + ".doc";
 	
@@ -227,6 +243,12 @@ function updateReportDB( dbReports, sAccessionNo ) {
 	readTokens( sReport.slice( iOffset ) );  		// All tokens
 }
 
+//
+//  dbCallback - function
+//  ----------
+//
+//  Callback for Database.each function
+//
 function dbCallback( err, row ){
 	if( err ){
 		throw err;
@@ -235,7 +257,10 @@ function dbCallback( err, row ){
 	updateReportDB( db, row.AccessionNo );
 }
 	
-
+//
+//  Main
+//  ----
+//
 const sqlite3 = require('sqlite3').verbose();
 let db = new sqlite3.Database('reports.sqlite')
 let sql = "SELECT DISTINCT AccessionNo FROM report ORDER BY AccessionNo";
@@ -249,10 +274,4 @@ catch( e ) {
 }
 
 db.close();
-
-
-// updateReportDB( db, "2003.001" );
-// for( let i=1;  i<dataFields.tokens.length-1; i++ ){
-	// console.log( dataFields.tokens[i], dataFields.fields[i]);
-// }
 

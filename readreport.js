@@ -219,7 +219,7 @@ function readTokens( dbReports, sAccessionNo, sReport, iToken = -1 ){
 	}
 	
 	sSQL = sSQL.slice( 0, sSQL.length - 1 );   // REMOVE TERMINATING ","
-	sSQL += " WHERE AccessionNo = " + sAccessionNo + ";";
+	sSQL += " WHERE AccessionNo = '" + sAccessionNo + "';";
 	
 	console.log( "SQL:", sSQL, "\n\n\n" );
 	
@@ -272,7 +272,6 @@ function dbCallback( err, row ){
 	if( err ){
 		throw err;
 	}
-	
 	updateReportDB( db, row.AccessionNo );
 }
 	
@@ -282,11 +281,12 @@ function dbCallback( err, row ){
 //
 const sqlite3 = require('sqlite3').verbose();
 let db = new sqlite3.Database('reports.sqlite')
-let sql = "SELECT DISTINCT AccessionNo FROM report ORDER BY AccessionNo";
+let sql = "SELECT DISTINCT AccessionNo FROM report WHERE LastModified IS NULL ORDER BY AccessionNo";
 
 try {
+	// db.serialize();
 	db.each( sql, [], dbCallback );			// Process all items in db
-	// updateReportDB( db, "2003.001" );	// *****TEST ONE REPORT
+	// updateReportDB( db, "2003.020" );	// *****TEST ONE REPORT
 }
 catch( e ) {
 	console.error( e.name );

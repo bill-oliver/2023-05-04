@@ -1,0 +1,44 @@
+1.01 Unitary Refrig and A/C Equipment and Systems - Household Cabinet Refrigerators
+1.02 Unitary Refrig. and A/C Equipment and Systems - Household Air Conditioners
+1.03 Unitary Refrig and A/C Equipment and Systems - Commercial Refrigerating Equipment
+10.02 Solid Fuel (Coal and Wood) Burning Equipment - Water Heating
+10.06 Solid Fuel (Coal and Wood) Burning Equipment - Fuel flow, Ignition and  Combustion Controls
+10.08 Solid Fuel (Coal and Wood) Burning Equipment - Other Components and Parts
+11.01 Vaporizing Oil Burning Equipment and Systems - Burners
+11.03 Vaporizing, Liquid Fuel Burning Equipment and Systems - Space Heating
+12.01 Pressure Atomizing Oil Burner Equipment and Systems - Burners
+12.05 Pressure Atomizing Oil Burner Equipment and Systems - Firing Assemblies
+12.06 Pressure Atomizing Oil Burner Equipment and Systems - Fuel Pump Assemblies
+12.07 Pressure Atomizing Oil Burner Equipment and Systems - Ignition Devices
+12.08 Pressure Atomizing Oil Burner Equipment and Systems - Fuel Flow and Combustion Controls
+12.09 Pressure Atomizing Oil Burner Equipment and Systems - Automatic Temperature Controls
+12.10 Pressure Atomizing Oil Burner Equipment and Systems - Room Temperature Thermostats
+12.11 Pressure Atomizing Oil Burner Equipment and Systems - Other Components and Parts
+12.12 Pressure Atomizing Oil Burner Equipment and Systems - Installation, Test and Repair
+14.02 Electric Heating Equipment - Water Heating
+14.03 Electric Heating Equipment - Space Heating
+14.05 Electric Heating Equipment - Room Temperature Thermostats
+15.02 Ventilation Equipment and Systems - Commercial
+16.01 Electric Motors - Single Phase, Repulsion Induction and Repulsion Motors
+16.02 Electric Motors - Single Phase Capacitor Start and Capacitor Run Motors
+16.03 Electric Motors - Single Phase, Split Phase
+16.04 Electric Motors - Single Phase, Shaded Pole and Universal
+16.06 Electric Motors - Components and Parts
+16.07 Electric Motors - Installation, Test and Repair
+16.08 Electric Motors - NEC
+2.01 Refrigerating and Air Conditioning Evaporators - Household
+2.02 Refrigerating and Air Conditioning Evaporators - Commercial
+3.01 Refrigerant Flow Controls - Household
+3.02 Refrigerant Flow Controls - Commercial
+3.03 Refrigerant Flow Controls - NEC
+4.01 Refrigerating and Air Conditioning Condensing Units - Household
+4.02 Refrigerating and Air Conditioning Condensing Units - Commercial
+5.01 Refrigerating and Air Conditioning Compressors - Household
+5.02 Refrigerating and Air Conditioning Compressors - Commercial
+6.01 Refrigerating and Air Conditioning Condensers and Receivers - Household
+6.02 Refrigerating and Air Conditioning Condensers and Receivers - Commercial
+7.01 Refrigerating and Air Conditioning Pressure and Temperature Controls - Household
+7.02 Refrigerating and Air Conditioning Pressure and Temperature Controls - Commercial
+8.01 Other Refrigerating and Air conditioning Components and Parts - Household
+8.02 Other Refrigerating and Air conditioning Components and Parts - Commercial
+8.03 Other Refrigerating and Air conditioning Components and Parts - NEC

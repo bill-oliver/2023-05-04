@@ -91,177 +91,112 @@ const dataFields = {
 		"RelatedReports",
 		"" ]
 }
-	
-//
-//  cleanString - function
-//  -----------
-//
-//  Cleans up the block of text retrieved by findSlice
-//
-function cleanString( sIn ){
-	var sOut = "";
-	
-	//
-	//  Trim of leading and trailing non-printables
-	//
-	while( sIn.charCodeAt(0) <= 32 && sIn.length > 0 ){
-//		console.log( sIn.charCodeAt(0));
-		sIn = sIn.substring(1);
-	}
 
-	while( sIn.charCodeAt(sIn.length-1) <= 32 && sIn.length > 0 ){
-//		console.log( sIn.charCodeAt(sIn.length-1));
-		sIn = sIn.substring(0, sIn.length-1 );
+function getSlice( db, sAccessionNo, sField ){
+	let i = dataFields.fields.indexOf( sField )
+	
+	if( i < 0 ){
+		throw( new Error( "Field " + sField + " not found in array" ) );
 	}
 	
-	// 
-	// Fix up new lines and other stuff word has embeded
-	//
-	for( let i = 0; i < sIn.length; i++ ){
-		let sChar = sIn.charAt( i );
-		if ( sChar == '\r' ){
-			sOut += '\n';           	// return should be new line
-		} 
-		else if( sChar == "'" ) {
-			sOut += "''";				//  Need to double up on quotes for SQL string
-		}
-		else if( sChar.charCodeAt( 0 ) == 65533 ) {
-			sOut += "''";				//  This seems to be a quote in word
-		}
-		else if( sChar > '\x7e' ){		//  Unexpected non-ascii character
-			throw new Error( "***** Unexpected char " + sChar.charCodeAt( 0 ) 
-							+ " at postion " + i + " in slice: \n" + sIn );
-		} 
-		else {
-			sOut += sChar;
-		}
-	}
-	// console.log( "sIn", sIn );
-	// console.log( "sOut", sOut );
+	let sSQL = "SELECT DISTINCT " + sField + " AS slice FROM report " +
+			   " WHERE AccessionNo = '" + sAccessionNo + "';";
 	
-	return sOut;
+	var row;
+	db.get( sSQL, [], (err, row) => {
+		if (err) {
+			throw( err );
+		}
+		console.log( row );
+		
+	})
+
+	 
+	return "";
 }
-
-//
-//  findSlice - function
-//  ---------
-//
-//  Returns the block of text between to heading tokens in the Report
-//
-//  sReport - string containing report text
-//  sToken1 - leading token (heading for data to be retreived
-//  sToken2 - terminating token (heading for next block of text)
-//
-function findSlice( sReport, sToken1, sToken2 ) {
-	let iToken1 = sReport.indexOf( sToken1 ) + sToken1.length;
-	let iToken2 = sReport.indexOf( sToken2, iToken1 );
-	let sSlice = sReport.slice( iToken1, iToken2 );
 	
-	// console.log( sToken1, sToken1.length, sToken2, iToken1, iToken2, ":" );
-	// console.log( "Slice: ***", sSlice, "***" );
-	
-	if( iToken1 < 0 ){
-		throw new Error( "Token " + sToken1 + " not found " );      //  **** ERROR ****
-	}
-	else if( iToken2 < 0 ){
-		throw new Error( "Token " + sToken2 + " not found " );      //  **** ERROR ****
-	}
-
-	//
-	//  CLEAN IT UP 
-	//
-	// console.log( "trimed Slice: ***", sSlice, "***" );
-	// console.log( "Length:", sSlice.length );
-	// console.log( "" );
-	
-	
-	sSlice = cleanString( sSlice );
-	
-	// console.log( sToken1, "***", sSlice, "***" );
-	// console.log( "Length:", sSlice.length );
-	// console.log( "" );
-	return sSlice;
-}
-
 //
-//  readTokens - function
+//  renderPage - function
 //  ----------
 //
-//  returns the block of text corresponding to tokens in the file
-//
-//  dbReports - reports database object 
-//  sReport - string containing report text
-//  iToken - index (in dataFields) of token to be found, 
-//           if omitted all tokens are retreived
-//
-function readTokens( dbReports, sAccessionNo, sReport, iToken = -1 ){
-	let sSlice;
+function renderPage( db, row ){
+	db.serialize();
+	
+	const sHead = "######";
+	let sPage = 
+		"<div align='center'>Research Reports</div>\n" +
+		"<div align='center'>Founding Collection, HVACR Heritage Centre Canada</div>\n" +
+		"<div align='center'>The Artifacts of HVACR Technology, Canada’s First Half Century</div>\n\n" +
+		"| **HHCC Accession No. " + row.AccessionNo + 
+		"** |**HHCC Classification Code:  " + row.Classification + "**|\n" +
+		"| ----------- | ----------- |\n\n" +
+		
+		sHead + "Last Modified:  " + getSlice( db, row.AccessionNo, "LastModified" ) + "\n\n" +
+		sHead + "\n" + getSlice( db, row.AccessionNo, "Grp" ) + "\n\n" +
+		sHead + "\n" + getSlice( db, row.AccessionNo, "Description" ) + "\n\n" +
+		// sHead + "\n" + getSlice( "FilmImage",
+		// sHead + "\n" + getSlice( "DigitalImage",
+		// sHead + "\n" + getSlice( "Make",
+		// sHead + "\n" + getSlice( "Manufacturer",
+		// sHead + "\n" + getSlice( "Model",
+		// sHead + "\n" + getSlice( "SerialNo",
+		// sHead + "\n" + getSlice( "Size",
+		// sHead + "\n" + getSlice( "Weight",
+		// sHead + "\n" + getSlice( "Circa",
+		// sHead + "\n" + getSlice( "Rating",
+		// sHead + "\n" + getSlice( "PatentDateNumber",
+		// sHead + "\n" + getSlice( "Provenance",
+		// sHead + "\n" + getSlice( "TypeandDesign",
+		// sHead + "\n" + getSlice( "Construction",
+		// sHead + "\n" + getSlice( "Material",
+		// sHead + "\n" + getSlice( "SpecialFeatures",
+		// sHead + "\n" + getSlice( "Accessories",
+		// sHead + "\n" + getSlice( "Capacities",
+		// sHead + "\n" + getSlice( "PerformanceCharacteristics",
+		// sHead + "\n" + getSlice( "Operation",
+		// sHead + "\n" + getSlice( "ControlandRegulation",
+		// sHead + "\n" + getSlice( "TargetedMarketSegment",
+		// sHead + "\n" + getSlice( "ConsumerAcceptance",
+		// sHead + "\n" + getSlice( "Merchandising",
+		// sHead + "\n" + getSlice( "MarketPrice",
+		// sHead + "\n" + getSlice( "TechSignificance",
+		// sHead + "\n" + getSlice( "IndSignificance",
+		// sHead + "\n" + getSlice( "EconSignificance",
+		// sHead + "\n" + getSlice( "CultSignificance",
+		// sHead + "\n" + getSlice( "Donor",
+		// sHead + "\n" + getSlice( "StorageLocation",
+		// sHead + "\n" + getSlice( "Tracking",
+		// sHead + "\n" + getSlice( "BiblioRef",
+		// sHead + "\n" + getSlice( "Notes",
+		sHead + "\n" + getSlice( db, row.AccessionNo, "RelatedReports") + "\n" 
+		
+		
+	//
+	// Add all the fields (skip the accession no and class code added above)
+	//
+	
+	// for( let i=2;  i<4; i++ ){
+	// for( let i=2;  i<dataFields.tokens.length-1; i++ ){
+		// sPage += dataFields.tokens[i] + "\n" + row[dataFields.fields] + "\n\n";
+	// }
+	
+	// for( let element of row ) {
+		// console.log( element );
+	// }
+	
+	
+	console.log( sPage );
+	
+	db.parallelize();
+	
 
-	/* for( let i=0;  i<tokens.length-1; i++ ){
-	//	console.log( tokens1[i], tokens1[i+1]);
-		sSlice = findSlice( sReport, tokens[i], tokens[i+1] );
-	}
-	 */	
-	let sSQL = "UPDATE report SET ";
-	if( iToken >= 0 ){
-		sSlice = findSlice( sReport, dataFields.tokens[iToken], dataFields.tokens[iToken+1] );
-		sSQL += dataFields.fields[ iToken ] + "='" + sSlice + "',";
-	} 
-	else {
-		//
-		// Read all the tokens in the file (skip the accession no and class code)
-		//
-		for( let i=2;  i<dataFields.tokens.length-1; i++ ){
-		//	console.log( tokens1[i], tokens1[i+1]);
-			sSlice = findSlice( sReport, dataFields.tokens[i], dataFields.tokens[i+1] );
-			sSQL += " " + dataFields.fields[ i ] + "='" + sSlice + "',";
-		}
-	}
-	
-	sSQL = sSQL.slice( 0, sSQL.length - 1 );   // REMOVE TERMINATING ","
-	sSQL += " WHERE AccessionNo = '" + sAccessionNo + "';";
-	
-	console.log( "SQL:", sSQL, "\n\n\n" );
-	
-	db.run( sSQL, [], function(err) {
-		if (err) {
-			throw(err);
-		}
-	} );
 }
-
-//
-//  updateReportDB - function
-//  --------------
-//
-//  Processes a research report word file.
-//
-//  dbReports - reports database object 
-//  sAccessionNo - the "Accession number" identifying the report to be processed (e.g. "2003.001")
-//
-function updateReportDB( dbReports, sAccessionNo ) {
-	let sFileName = "./reports/Res. Rpts. Founding Collection " + sAccessionNo + ".doc";
 	
-	//
-	// Read the word document
-	//
-	let sReport = fs.readFileSync( sFileName, {encoding: 'utf8' } );
-
-	console.log( "\nProcessing: ",  sFileName );
-
-	//
-	//  Trim off the garbage at the top 
-	//
-	const sHeader = "Research Reports";
-	let iOffset = sReport.indexOf( sHeader );
-	// console.log( "Header offset", iOffset );
-
-	// readTokens( dbReports, sAccessionNo, 
-	            // sReport.slice( iOffset ), 4 );  	// Test one token only
-	readTokens( dbReports, sAccessionNo, 
-	            sReport.slice( iOffset ) );  		// All tokens
-}
-
+	
+	
+	
+	
+	
 //
 //  dbCallback - function
 //  ----------
@@ -272,7 +207,7 @@ function dbCallback( err, row ){
 	if( err ){
 		throw err;
 	}
-	updateReportDB( db, row.AccessionNo );
+	renderPage( db, row );
 }
 	
 //
@@ -281,7 +216,9 @@ function dbCallback( err, row ){
 //
 const sqlite3 = require('sqlite3').verbose();
 let db = new sqlite3.Database('reports.sqlite')
-let sql = "SELECT DISTINCT AccessionNo FROM report WHERE LastModified IS NULL ORDER BY AccessionNo";
+// let sql = "SELECT * FROM report";
+let sql = "SELECT * FROM report WHERE AccessionNo = '2003.020'";
+
 
 try {
 	// db.serialize();
@@ -294,4 +231,5 @@ catch( e ) {
 }
 
 db.close();
+
 

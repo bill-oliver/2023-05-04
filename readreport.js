@@ -240,7 +240,7 @@ function readTokens( dbReports, sAccessionNo, sReport, iToken = -1 ){
 //  sAccessionNo - the "Accession number" identifying the report to be processed (e.g. "2003.001")
 //
 function updateReportDB( dbReports, sAccessionNo ) {
-	let sFileName = "../reports/Res. Rpts. Founding Collection " + sAccessionNo + ".doc";
+	let sFileName = "./reports/Res. Rpts. Founding Collection " + sAccessionNo + ".doc";
 	
 	//
 	// Read the word document

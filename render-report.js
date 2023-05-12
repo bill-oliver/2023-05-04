@@ -93,8 +93,6 @@ const dataFields = {
 }
 
 function getSlice( db, sAccessionNo, sField ){
-	let db2 = new sqlite3.Database('reports.sqlite');
-	
 	let i = dataFields.fields.indexOf( sField );
 	
 	if( i < 0 ){
@@ -104,26 +102,18 @@ function getSlice( db, sAccessionNo, sField ){
 	let sSQL = "SELECT DISTINCT " + sField + " AS slice FROM report " +
 			   " WHERE AccessionNo = '" + sAccessionNo + "';";
 	
-	var row1;
-	// var bDone = 0;
-	
-	db2.get( sSQL, [], (err, row) => {
+	db.get( sSQL, [], (err, row) => {
 		if (err) {
 			throw( err );
 		}
-		row1 = row;
-		// console.log( row );
-		// bDone++;
+		console.log( row );
 	})
 
-	
-	db2.close();
-	
-	console.log( "row1: ", row1 );
-	
+
 	return "@@@@";
 }
-	
+
+var sPage;
 //
 //  renderPage - function
 //  ----------
@@ -132,7 +122,7 @@ function renderPage( db, row ){
 	// db.serialize();
 	
 	const sHead = "######";
-	let sPage = 
+	sPage = 
 		"<div align='center'>Research Reports</div>\n" +
 		"<div align='center'>Founding Collection, HVACR Heritage Centre Canada</div>\n" +
 		"<div align='center'>The Artifacts of HVACR Technology, Canada’s First Half Century</div>\n\n" +
@@ -194,56 +184,51 @@ function renderPage( db, row ){
 	// }
 	
 	
-	console.log( sPage );
+	// console.log( sPage );
 	
 	// db.parallelize();
 	
 
 }
 
+function makeSQL( sField ){
+	let sSQL = "SELECT DISTINCT " + sField + " AS slice FROM report " +
+			   " WHERE AccessionNo = '2003.020'";
+			   
+	return sSQL;
+}
+
 var mapSlices = new Map();
-function buildMap( row ){
+function buildMap(  ){
 	let db2 = new sqlite3.Database('reports.sqlite');
 	
 	
-	let sSQL = "SELECT DISTINCT ? AS slice FROM report " +
-			   " WHERE AccessionNo = '2003.020'";
+	// var sSQL = "SELECT DISTINCT ? AS slice FROM report " +
+			   // " WHERE AccessionNo = '2003.020'";
 	
-	var row1;
-	// var bDone = 0;
-	
-	db2.get( sSQL, ["LastModified"], (err, row) => {
-		if (err) {
-			throw( err );
-		}
-		console.log( row );
+	// db2.serialize();
+	db2.get( makeSQL( "LastModified" ), [], (err, row) => {
 		mapSlices.set( "LastModified", row.slice );
-		db2.get( sSQL, ["Grp"], (err, row) => {
-			if (err) {
-				throw( err );
-			}
-			console.log( row );
+		db2.get( makeSQL( "Grp"), [], (err, row) => {
 			mapSlices.set( "Grp", row.slice );
-			db2.get( sSQL, ["Description"], (err, row) => {
-				if (err) {
-					throw( err );
-				}
-				console.log( row );
+			db2.get( makeSQL( "Description"), [], (err, row) => {
 				mapSlices.set( "Description", row.slice );
-				db2.get( sSQL, ["Make"], (err, row) => {
-					if (err) {
-						throw( err );
-					}
-					console.log( row );
+				db2.get( makeSQL( "Make"), [], (err, row) => {
 					mapSlices.set( "Make", row.slice );
-					console.log( mapSlices );
 				});
 			});
 		});
 	});
 	
-	db2.close();
-	console.log( mapSlices );
+	db2.parallelize();
+	db2.close((err) => {
+	  if (err)
+			console.log(err.message);
+	  else{
+			console.log('Close the database2 connection.');
+			console.log( "mapSlices", mapSlices );
+	  }
+	});
 }
 	
 //
@@ -257,7 +242,7 @@ function dbCallback( err, row ){
 		throw err;
 	}
 	// renderPage( db, row );
-	buildMap( row );
+	buildMap( );
 }
 	
 //
@@ -280,6 +265,13 @@ catch( e ) {
 	console.error( e.message );
 }
 
-db.close();
-
+db.close( );
+// db.close((err) => {
+  // if (err)
+    // console.log(err.message);
+  // else{
+    // console.log('Close the database connection.');
+	// console.log( "***THE PAGE****\n",sPage );
+  // }
+// });
 

@@ -93,7 +93,9 @@ const dataFields = {
 }
 
 function getSlice( db, sAccessionNo, sField ){
-	let i = dataFields.fields.indexOf( sField )
+	let db2 = new sqlite3.Database('reports.sqlite');
+	
+	let i = dataFields.fields.indexOf( sField );
 	
 	if( i < 0 ){
 		throw( new Error( "Field " + sField + " not found in array" ) );
@@ -102,17 +104,24 @@ function getSlice( db, sAccessionNo, sField ){
 	let sSQL = "SELECT DISTINCT " + sField + " AS slice FROM report " +
 			   " WHERE AccessionNo = '" + sAccessionNo + "';";
 	
-	var row;
-	db.get( sSQL, [], (err, row) => {
+	var row1;
+	// var bDone = 0;
+	
+	db2.get( sSQL, [], (err, row) => {
 		if (err) {
 			throw( err );
 		}
-		console.log( row );
-		
+		row1 = row;
+		// console.log( row );
+		// bDone++;
 	})
 
-	 
-	return "";
+	
+	db2.close();
+	
+	console.log( "row1: ", row1 );
+	
+	return "@@@@";
 }
 	
 //
@@ -120,7 +129,7 @@ function getSlice( db, sAccessionNo, sField ){
 //  ----------
 //
 function renderPage( db, row ){
-	db.serialize();
+	// db.serialize();
 	
 	const sHead = "######";
 	let sPage = 
@@ -187,11 +196,18 @@ function renderPage( db, row ){
 	
 	console.log( sPage );
 	
-	db.parallelize();
+	// db.parallelize();
 	
 
 }
+
+// var mapSlices = new Map();
+// function buildMap( ){
+	// let db2 = new sqlite3.Database('reports.sqlite')
 	
+	// for( let i=2;  i<4; i++ ){
+	// for( let i=2;  i<dataFields.tokens.length-1; i++ ){
+		// mapSlices.set( dataFields.fields[i], 
 	
 	
 	
@@ -215,6 +231,7 @@ function dbCallback( err, row ){
 //  ----
 //
 const sqlite3 = require('sqlite3').verbose();
+
 let db = new sqlite3.Database('reports.sqlite')
 // let sql = "SELECT * FROM report";
 let sql = "SELECT * FROM report WHERE AccessionNo = '2003.020'";
@@ -223,7 +240,6 @@ let sql = "SELECT * FROM report WHERE AccessionNo = '2003.020'";
 try {
 	// db.serialize();
 	db.each( sql, [], dbCallback );			// Process all items in db
-	// updateReportDB( db, "2003.020" );	// *****TEST ONE REPORT
 }
 catch( e ) {
 	console.error( e.name );

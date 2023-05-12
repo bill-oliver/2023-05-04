@@ -118,77 +118,59 @@ var sPage;
 //  renderPage - function
 //  ----------
 //
-function renderPage( mapSlices ){
+function renderPage( m ){
 	// db.serialize();
 	
-	const sHead = "######";   // Use heading level 6 for section headers
+	const sHead = "##### ";   // Use heading level 5 for section headers
+	
 	sPage = 
 		"<div align='center'>Research Reports</div>\n" +
 		"<div align='center'>Founding Collection, HVACR Heritage Centre Canada</div>\n" +
 		"<div align='center'>The Artifacts of HVACR Technology, Canada’s First Half Century</div>\n\n" +
-		"| **HHCC Accession No. " + row.AccessionNo + 
-		"** |**HHCC Classification Code:  " + row.Classification + "**|\n" +
+		"| **HHCC Accession No. " + m.get( "AccessionNo" ) + 
+		"** |**HHCC Classification Code:  " + m.get( "Classification" ) + "**|\n" +
 		"| ----------- | ----------- |\n\n" +
 		
-		sHead + "Last Modified:  " + getSlice( db, row.AccessionNo, "LastModified" ) + "\n\n" +
-		sHead + "\n" + getSlice( db, row.AccessionNo, "Grp" ) + "\n\n" +
-		sHead + "\n" + getSlice( db, row.AccessionNo, "Description" ) + "\n\n" +
-		// sHead + "\n" + getSlice( "FilmImage",
-		// sHead + "\n" + getSlice( "DigitalImage",
-		// sHead + "\n" + getSlice( "Make",
-		// sHead + "\n" + getSlice( "Manufacturer",
-		// sHead + "\n" + getSlice( "Model",
-		// sHead + "\n" + getSlice( "SerialNo",
-		// sHead + "\n" + getSlice( "Size",
-		// sHead + "\n" + getSlice( "Weight",
-		// sHead + "\n" + getSlice( "Circa",
-		// sHead + "\n" + getSlice( "Rating",
-		// sHead + "\n" + getSlice( "PatentDateNumber",
-		// sHead + "\n" + getSlice( "Provenance",
-		// sHead + "\n" + getSlice( "TypeandDesign",
-		// sHead + "\n" + getSlice( "Construction",
-		// sHead + "\n" + getSlice( "Material",
-		// sHead + "\n" + getSlice( "SpecialFeatures",
-		// sHead + "\n" + getSlice( "Accessories",
-		// sHead + "\n" + getSlice( "Capacities",
-		// sHead + "\n" + getSlice( "PerformanceCharacteristics",
-		// sHead + "\n" + getSlice( "Operation",
-		// sHead + "\n" + getSlice( "ControlandRegulation",
-		// sHead + "\n" + getSlice( "TargetedMarketSegment",
-		// sHead + "\n" + getSlice( "ConsumerAcceptance",
-		// sHead + "\n" + getSlice( "Merchandising",
-		// sHead + "\n" + getSlice( "MarketPrice",
-		// sHead + "\n" + getSlice( "TechSignificance",
-		// sHead + "\n" + getSlice( "IndSignificance",
-		// sHead + "\n" + getSlice( "EconSignificance",
-		// sHead + "\n" + getSlice( "CultSignificance",
-		// sHead + "\n" + getSlice( "Donor",
-		// sHead + "\n" + getSlice( "StorageLocation",
-		// sHead + "\n" + getSlice( "Tracking",
-		// sHead + "\n" + getSlice( "BiblioRef",
-		// sHead + "\n" + getSlice( "Notes",
-		sHead + "\n" + getSlice( db, row.AccessionNo, "RelatedReports") + "\n" 
-		
-		
-	//
-	// Add all the fields (skip the accession no and class code added above)
-	//
-	
-	// for( let i=2;  i<4; i++ ){
-	// for( let i=2;  i<dataFields.tokens.length-1; i++ ){
-		// sPage += dataFields.tokens[i] + "\n" + row[dataFields.fields] + "\n\n";
-	// }
-	
-	// for( let element of row ) {
-		// console.log( element );
-	// }
-	
-	
-	// console.log( sPage );
-	
-	// db.parallelize();
-	
+		sHead + "Last Modified:\n" + m.get( "LastModified" ) + "\n\n" +
+		sHead + "Group:\n" + m.get( "Grp" ) + "\n\n" +
+		sHead + "Description:\n" + m.get( "Description" ) + "\n\n" +
+		sHead + "Film Image:\n" + m.get( "FilmImage"  ) + "\n\n" +
+		sHead + "Digital Image:\n" + m.get( "DigitalImage"  ) + "\n\n" +
+		sHead + "Make:\n" + m.get( "Make"  ) + "\n\n" +
+		sHead + "Manufacturer:\n" + m.get( "Manufacturer"  ) + "\n\n" +
+		sHead + "Model:\n" + m.get( "Model"  ) + "\n\n" +
+		sHead + "Serial No.:\n" + m.get( "SerialNo"  ) + "\n\n" +
+		sHead + "Size:\n" + m.get( "Size"  ) + "\n\n" +
+		sHead + "Weight:\n" + m.get( "Weight"  ) + "\n\n" +
+		sHead + "Circa:\n" + m.get( "Circa"  ) + "\n\n" +
+		sHead + "Rating:\n" + m.get( "Rating"  ) + "\n\n" +
+		sHead + "Patent Date/Number:\n" + m.get( "PatentDateNumber"  ) + "\n\n" +
+		sHead + "Provenance:\n" + m.get( "Provenance"  ) + "\n\n" +
+		sHead + "Type and Design:\n" + m.get( "TypeandDesign"  ) + "\n\n" +
+		sHead + "Construction:\n" + m.get( "Construction"  ) + "\n\n" +
+		sHead + "Material:\n" + m.get( "Material"  ) + "\n\n" +
+		sHead + "Special Features:\n" + m.get( "SpecialFeatures"  ) + "\n\n" +
+		sHead + "Accessories\n" + m.get( "Accessories"  ) + "\n\n" +
+		sHead + "Capacities:\n" + m.get( "Capacities"  ) + "\n\n" +
+		sHead + "Performance Characteristics:\n" + m.get( "PerformanceCharacteristics"  ) + "\n\n" +
+		sHead + "Operation:\n" + m.get( "Operation"  ) + "\n\n" +
+		sHead + "Control and Regulation:\n" + m.get( "ControlandRegulation"  ) + "\n\n" +
+		sHead + "Targeted Market Segment:\n" + m.get( "TargetedMarketSegment"  ) + "\n\n" +
+		sHead + "Consumer Acceptance:\n" + m.get( "ConsumerAcceptance"  ) + "\n\n" +
+		sHead + "Merchandising:\n" + m.get( "Merchandising"  ) + "\n\n" +
+		sHead + "Market Price:\n" + m.get( "MarketPrice"  ) + "\n\n" +
+		sHead + "Technological Significance:\n" + m.get( "TechSignificance"  ) + "\n\n" +
+		sHead + "Industrial Significance:\n" + m.get( "IndSignificance"  ) + "\n\n" +
+		sHead + "Socio-economic Significance:\n" + m.get( "EconSignificance"  ) + "\n\n" +
+		sHead + "Socio-cultural Significance:\n" + m.get( "CultSignificance"  ) + "\n\n" +
+		sHead + "Donor:\n" + m.get( "Donor"  ) + "\n\n" +
+		sHead + "HHCC Storage Location:\n" + m.get( "StorageLocation"  ) + "\n\n" +
+		sHead + "Tracking:\n" + m.get( "Tracking"  ) + "\n\n" +
+		sHead + "Bibliographic References:\n" + m.get( "BiblioRef"  ) + "\n\n" +
+		sHead + "Notes:\n" + m.get( "Notes"  ) + "\n\n" +
+		sHead + "Related Reports\n" + m.get( "RelatedReports") + "\n" 
 
+	console.log( sPage );
 }
 
 //
@@ -353,6 +335,7 @@ function buildMap(  ){
 	  else{
 			console.log('Close the database2 connection.');
 			console.log( "mapSlices", mapSlices );
+			renderPage( mapSlices );
 	  }
 	});
 }

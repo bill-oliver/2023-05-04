@@ -191,36 +191,156 @@ function renderPage( db, row ){
 
 }
 
+//
+//  makeSQL - function
+//  -------
+//
+//  Helper for buildMap
+//
 function makeSQL( sField ){
 	let sSQL = "SELECT DISTINCT " + sField + " AS slice FROM report " +
 			   " WHERE AccessionNo = '2003.020'";
-			   
 	return sSQL;
 }
 
-var mapSlices = new Map();
+//  buildMap - function
+//  --------
+//
+//  Builds a map of the text fields from the database
+//
+//  This *seems* like the only way to do this based on the parallel db operation
+//  Caution with the use of variable i if they don't execute in sequence...
+//
 function buildMap(  ){
 	let db2 = new sqlite3.Database('reports.sqlite');
+
+	var mapSlices = new Map();
+	var i = 2;
 	
-	
-	// var sSQL = "SELECT DISTINCT ? AS slice FROM report " +
-			   // " WHERE AccessionNo = '2003.020'";
-	
-	// db2.serialize();
-	db2.get( makeSQL( "LastModified" ), [], (err, row) => {
-		mapSlices.set( "LastModified", row.slice );
-		db2.get( makeSQL( "Grp"), [], (err, row) => {
-			mapSlices.set( "Grp", row.slice );
-			db2.get( makeSQL( "Description"), [], (err, row) => {
-				mapSlices.set( "Description", row.slice );
-				db2.get( makeSQL( "Make"), [], (err, row) => {
-					mapSlices.set( "Make", row.slice );
+	if( dataFields.fields.length != 41 ){
+		throw new Error( "function buildMap assumes exactly"
+											+ dataFields.fields.length + " fields to process" );
+	}
+											
+	db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+		mapSlices.set( dataFields.fields[i++], row.slice );
+		db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+			mapSlices.set( dataFields.fields[i++], row.slice );
+			db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+				mapSlices.set( dataFields.fields[i++], row.slice );
+				db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+					mapSlices.set( dataFields.fields[i++], row.slice );
+					db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+						mapSlices.set( dataFields.fields[i++], row.slice );
+						db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+							mapSlices.set( dataFields.fields[i++], row.slice );
+							db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+								mapSlices.set( dataFields.fields[i++], row.slice );
+								db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+									mapSlices.set( dataFields.fields[i++], row.slice );
+									db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+										mapSlices.set( dataFields.fields[i++], row.slice );
+										db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+											mapSlices.set( dataFields.fields[i++], row.slice );
+											db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+												mapSlices.set( dataFields.fields[i++], row.slice );
+												db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+													mapSlices.set( dataFields.fields[i++], row.slice );
+													db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+														mapSlices.set( dataFields.fields[i++], row.slice );
+														db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+															mapSlices.set( dataFields.fields[i++], row.slice );
+															db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																mapSlices.set( dataFields.fields[i++], row.slice );
+																db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																	mapSlices.set( dataFields.fields[i++], row.slice );
+																	db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																		mapSlices.set( dataFields.fields[i++], row.slice );
+																		db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																			mapSlices.set( dataFields.fields[i++], row.slice );
+																			db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																				mapSlices.set( dataFields.fields[i++], row.slice );
+																				db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																					mapSlices.set( dataFields.fields[i++], row.slice );
+																					db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																						mapSlices.set( dataFields.fields[i++], row.slice );
+																						db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																							mapSlices.set( dataFields.fields[i++], row.slice );
+																							db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																								mapSlices.set( dataFields.fields[i++], row.slice );
+																								db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																									mapSlices.set( dataFields.fields[i++], row.slice );
+																									db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																										mapSlices.set( dataFields.fields[i++], row.slice );
+																										db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																											mapSlices.set( dataFields.fields[i++], row.slice );
+																											db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																												mapSlices.set( dataFields.fields[i++], row.slice );
+																												db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																													mapSlices.set( dataFields.fields[i++], row.slice );
+																													db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																														mapSlices.set( dataFields.fields[i++], row.slice );
+																														db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																															mapSlices.set( dataFields.fields[i++], row.slice );
+																															db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																																mapSlices.set( dataFields.fields[i++], row.slice );
+																																db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																																	mapSlices.set( dataFields.fields[i++], row.slice );
+																																	db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																																		mapSlices.set( dataFields.fields[i++], row.slice );
+																																		db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																																			mapSlices.set( dataFields.fields[i++], row.slice );
+																																			db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																																				mapSlices.set( dataFields.fields[i++], row.slice );
+																																				db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																																					mapSlices.set( dataFields.fields[i++], row.slice );
+																																					db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																																						mapSlices.set( dataFields.fields[i++], row.slice );
+																																						db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																																							mapSlices.set( dataFields.fields[i++], row.slice );
+																																							console.log( i, dataFields.fields.length );
+																																						});
+																																					});
+																																				});
+																																			});
+																																		});
+																																	});
+																																});
+																															});
+																														});
+																													});
+																												});
+																											});
+																										});
+																									});
+																								});
+																							});
+																						});
+																					});
+																				});
+																			});
+																		});
+																	});
+																});
+															});
+														});
+													});
+												});
+											});
+										});
+									});
+								});
+							});
+						});
+					});
 				});
 			});
 		});
 	});
 	
-	db2.parallelize();
+	//
+	//  Must wait for the close to complete before we can use the Map
+	//
 	db2.close((err) => {
 	  if (err)
 			console.log(err.message);

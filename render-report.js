@@ -118,10 +118,10 @@ var sPage;
 //  renderPage - function
 //  ----------
 //
-function renderPage( db, row ){
+function renderPage( mapSlices ){
 	// db.serialize();
 	
-	const sHead = "######";
+	const sHead = "######";   // Use heading level 6 for section headers
 	sPage = 
 		"<div align='center'>Research Reports</div>\n" +
 		"<div align='center'>Founding Collection, HVACR Heritage Centre Canada</div>\n" +
@@ -215,7 +215,7 @@ function buildMap(  ){
 	let db2 = new sqlite3.Database('reports.sqlite');
 
 	var mapSlices = new Map();
-	var i = 2;
+	var i = 0;
 	
 	if( dataFields.fields.length != 41 ){
 		throw new Error( "function buildMap assumes exactly"
@@ -298,7 +298,13 @@ function buildMap(  ){
 																																						mapSlices.set( dataFields.fields[i++], row.slice );
 																																						db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
 																																							mapSlices.set( dataFields.fields[i++], row.slice );
-																																							console.log( i, dataFields.fields.length );
+																																							db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																																								mapSlices.set( dataFields.fields[i++], row.slice );
+																																								db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
+																																									mapSlices.set( dataFields.fields[i++], row.slice );
+																																									console.log( i, dataFields.fields.length );
+																																								});
+																																							});
 																																						});
 																																					});
 																																				});

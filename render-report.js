@@ -201,17 +201,50 @@ function renderPage( db, row ){
 
 }
 
-// var mapSlices = new Map();
-// function buildMap( ){
-	// let db2 = new sqlite3.Database('reports.sqlite')
-	
-	// for( let i=2;  i<4; i++ ){
-	// for( let i=2;  i<dataFields.tokens.length-1; i++ ){
-		// mapSlices.set( dataFields.fields[i], 
+var mapSlices = new Map();
+function buildMap( row ){
+	let db2 = new sqlite3.Database('reports.sqlite');
 	
 	
+	let sSQL = "SELECT DISTINCT ? AS slice FROM report " +
+			   " WHERE AccessionNo = '2003.020'";
 	
+	var row1;
+	// var bDone = 0;
 	
+	db2.get( sSQL, ["LastModified"], (err, row) => {
+		if (err) {
+			throw( err );
+		}
+		console.log( row );
+		mapSlices.set( "LastModified", row.slice );
+		db2.get( sSQL, ["Grp"], (err, row) => {
+			if (err) {
+				throw( err );
+			}
+			console.log( row );
+			mapSlices.set( "Grp", row.slice );
+			db2.get( sSQL, ["Description"], (err, row) => {
+				if (err) {
+					throw( err );
+				}
+				console.log( row );
+				mapSlices.set( "Description", row.slice );
+				db2.get( sSQL, ["Make"], (err, row) => {
+					if (err) {
+						throw( err );
+					}
+					console.log( row );
+					mapSlices.set( "Make", row.slice );
+					console.log( mapSlices );
+				});
+			});
+		});
+	});
+	
+	db2.close();
+	console.log( mapSlices );
+}
 	
 //
 //  dbCallback - function
@@ -223,7 +256,8 @@ function dbCallback( err, row ){
 	if( err ){
 		throw err;
 	}
-	renderPage( db, row );
+	// renderPage( db, row );
+	buildMap( row );
 }
 	
 //

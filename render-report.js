@@ -92,41 +92,81 @@ const dataFields = {
 		"" ]
 }
 
-function getSlice( db, sAccessionNo, sField ){
-	let i = dataFields.fields.indexOf( sField );
-	
-	if( i < 0 ){
-		throw( new Error( "Field " + sField + " not found in array" ) );
-	}
-	
-	let sSQL = "SELECT DISTINCT " + sField + " AS slice FROM report " +
-			   " WHERE AccessionNo = '" + sAccessionNo + "';";
-	
-	db.get( sSQL, [], (err, row) => {
-		if (err) {
-			throw( err );
+//
+//  cleanMDString - function
+//  -------------
+//
+//  Cleans up the block of text retrieved by findSlice
+//  see https://www.markdownguide.org/basic-syntax/#escaping-characters
+//
+const restrictedChars = [     
+			"\\",			// backslash
+			"`",	 		// backtick 
+			"*",			// asterisk
+			"_",			// underscore
+			"{ }",		// 	curly braces
+			"[ ]",		// 	brackets
+			"< >",		// 	angle brackets
+			"( )",		// 	parentheses
+			"#",			// pound sign
+			"+",			// plus sign
+			"-",			// minus sign (hyphen)
+			".",			// dot
+			"!",			// exclamation mark
+			"|" ];		// pipe 
+
+function cleanString( sIn ){
+			
+	var sOut = "";
+
+	for( let i = 0; i < sIn.length; i++ ){
+		let sChar = sIn.charAt( i );
+		
+		for( let j = 0; j < restrictedChars.length; j++ ){
+			if ( sChar == restrictedChars[ j ] ){
+				sOut += '\\';           	// Escape the next character
+				console.log( sIn );
+				console.log( sOut );
+			}
 		}
-		console.log( row );
-	})
-
-
-	return "@@@@";
+		
+		sOut += sChar;
+	}
+	// console.log( "sIn", sIn );
+	// console.log( "sOut", sOut );
+	
+	return sOut;
 }
 
-var sPage;
+// function cb( value, key ){
+	// console.log( key );
+	// cleanString( value );
+// }
+
+// function test( m ){
+	// m.forEach( cb );
+// }
+
 //
 //  renderPage - function
 //  ----------
 //
+//  Builds the Markdown Reasearch Report web page in a global string
+//
+//    m - Map containing the fields and the associated text 
+//         (built by buildMap function)
+//
+var sPage;                    //  Global string buffer for the rendered page
+
 function renderPage( m ){
 	// db.serialize();
 	
 	const sHead = "##### ";   // Use heading level 5 for section headers
 	
 	sPage = 
-		"<div align='center'>Research Reports</div>\n" +
-		"<div align='center'>Founding Collection, HVACR Heritage Centre Canada</div>\n" +
-		"<div align='center'>The Artifacts of HVACR Technology, Canada’s First Half Century</div>\n\n" +
+		// "<div align='center'>Research Reports</div>\n" +
+		// "<div align='center'>Founding Collection, HVACR Heritage Centre Canada</div>\n" +
+		// "<div align='center'>The Artifacts of HVACR Technology, Canada’s First Half Century</div>\n\n" +
 		"| **HHCC Accession No. " + m.get( "AccessionNo" ) + 
 		"** |**HHCC Classification Code:  " + m.get( "Classification" ) + "**|\n" +
 		"| ----------- | ----------- |\n\n" +
@@ -170,7 +210,8 @@ function renderPage( m ){
 		sHead + "Notes:\n" + m.get( "Notes"  ) + "\n\n" +
 		sHead + "Related Reports\n" + m.get( "RelatedReports") + "\n" 
 
-	console.log( sPage );
+	// console.log( sPage );
+	fs.writeFileSync( ".\\markdown\\" + m.get( "AccessionNo" ) + ".md", sPage );
 }
 
 //
@@ -179,11 +220,6 @@ function renderPage( m ){
 //
 //  Helper for buildMap
 //
-function makeSQL( sField ){
-	let sSQL = "SELECT DISTINCT " + sField + " AS slice FROM report " +
-			   " WHERE AccessionNo = '2003.020'";
-	return sSQL;
-}
 
 //  buildMap - function
 //  --------
@@ -193,8 +229,16 @@ function makeSQL( sField ){
 //  This *seems* like the only way to do this based on the parallel db operation
 //  Caution with the use of variable i if they don't execute in sequence...
 //
-function buildMap(  ){
+function buildMap( sAccNo ){
+	
 	let db2 = new sqlite3.Database('reports.sqlite');
+
+	function makeSQL( sField ){           // Local helper function
+		let sSQL = "SELECT DISTINCT " + sField + " AS slice FROM report " +
+					 " WHERE AccessionNo = '" + sAccNo + "';";
+					 // " WHERE AccessionNo = " + "'2003.020';";
+		return sSQL;
+	}
 
 	var mapSlices = new Map();
 	var i = 0;
@@ -284,7 +328,6 @@ function buildMap(  ){
 																																								mapSlices.set( dataFields.fields[i++], row.slice );
 																																								db2.get( makeSQL( dataFields.fields[i] ), [], (err, row) => {
 																																									mapSlices.set( dataFields.fields[i++], row.slice );
-																																									console.log( i, dataFields.fields.length );
 																																								});
 																																							});
 																																						});
@@ -334,8 +377,9 @@ function buildMap(  ){
 			console.log(err.message);
 	  else{
 			console.log('Close the database2 connection.');
-			console.log( "mapSlices", mapSlices );
+			// console.log( "mapSlices", mapSlices );
 			renderPage( mapSlices );
+			// test( mapSlices );
 	  }
 	});
 }
@@ -351,7 +395,7 @@ function dbCallback( err, row ){
 		throw err;
 	}
 	// renderPage( db, row );
-	buildMap( );
+	buildMap( row.AccessionNo );
 }
 	
 //
@@ -361,8 +405,8 @@ function dbCallback( err, row ){
 const sqlite3 = require('sqlite3').verbose();
 
 let db = new sqlite3.Database('reports.sqlite')
-// let sql = "SELECT * FROM report";
-let sql = "SELECT * FROM report WHERE AccessionNo = '2003.020'";
+let sql = "SELECT * FROM report";
+// let sql = "SELECT * FROM report WHERE AccessionNo = '2003.020'";
 
 
 try {
@@ -375,12 +419,4 @@ catch( e ) {
 }
 
 db.close( );
-// db.close((err) => {
-  // if (err)
-    // console.log(err.message);
-  // else{
-    // console.log('Close the database connection.');
-	// console.log( "***THE PAGE****\n",sPage );
-  // }
-// });
 

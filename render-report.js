@@ -93,7 +93,7 @@ const dataFields = {
 }
 
 //
-//  cleanMDString - function
+//  cleanMDString - function  ***NOT USED***
 //  -------------
 //
 //  Cleans up the block of text retrieved by findSlice
@@ -138,14 +138,74 @@ function cleanString( sIn ){
 	return sOut;
 }
 
-// function cb( value, key ){
-	// console.log( key );
-	// cleanString( value );
-// }
 
-// function test( m ){
-	// m.forEach( cb );
-// }
+function updatePublii( sClass, sPage ){
+	var dbPublii = new sqlite3.Database('db.sqlite');  // Use a copy of Publii database
+
+	var sSQLPost = "INSERT INTO posts( title, slug, text, created_at, modified_at, status, template ) " +
+								"VALUES( ?, ?, ?, ?, ?, ?, ? );"
+	var sSQLAdditional = "INSERT INTO posts_additional_data( post_id, key, value ) " +
+											"VALUES( ?, ?, ? );"
+
+	//
+	// Get reference data from the reference post we are cloning
+	//
+	dbPublii.get( "SELECT DISTINCT * FROM posts WHERE slug = 'reference'", 
+								[], ( err, postRef ) => {
+		if( err )
+			throw err;
+	  else{
+			dbPublii.get( "SELECT DISTINCT * FROM posts_additional_data "+
+										"WHERE post_ID = '" + postRef.id "' " +
+										"AND key = '_core'", 
+										[], ( err, coreRef ) => {
+				if( err )
+					throw err;
+				else{
+					dbPublii.get( "SELECT DISTINCT * FROM posts_additional_data "+
+												"WHERE post_ID = '" + postRef.id "' " +
+												"AND key = 'postViewSettings'", 
+												[], ( err, viewRef ) => {
+						if( err )
+							throw err;
+						else{
+							//
+							//  Add the new post to the posts table
+							//
+							dbPublii.run( sSQLPost, 
+													[ sClass,  						// title
+														sClass,  						// slug
+														sPage,							// text
+														rowRef.created_at,	// copy from reference
+														rowRef.modified_at,	// copy from reference
+														rowRef.status,			// copy from reference
+														"" ],								// template is empty
+														( err ) => {
+								if( err )
+									throw err;
+								else{
+									//
+									//  Add the additional post data to posts_additional_data
+									//							
+									dbPublii.run( sSQLAdditional, 
+															[ this.lastID,				// ID from post we just added
+																coreRef.key,				// copy from reference
+																coreRef.value ] );	// copy from reference
+									dbPublii.run( sSQLAdditional, 
+															[ this.lastID,				// ID from post we just added
+																viewRef.key,				// copy from reference
+																viewRef.value ] );	// copy from reference
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	dbPublii.close();
+}
 
 //
 //  renderPage - function
@@ -211,15 +271,9 @@ function renderPage( m ){
 		sHead + "Related Reports\n" + m.get( "RelatedReports") + "\n" 
 
 	// console.log( sPage );
-	fs.writeFileSync( ".\\markdown\\" + m.get( "AccessionNo" ) + ".md", sPage );
+	fs.writeFileSync( ".\\markdown\\" + m.get( "Classification" ) + ".md", sPage );
 }
 
-//
-//  makeSQL - function
-//  -------
-//
-//  Helper for buildMap
-//
 
 //  buildMap - function
 //  --------
@@ -405,8 +459,8 @@ function dbCallback( err, row ){
 const sqlite3 = require('sqlite3').verbose();
 
 let db = new sqlite3.Database('reports.sqlite')
-let sql = "SELECT * FROM report";
-// let sql = "SELECT * FROM report WHERE AccessionNo = '2003.020'";
+// let sql = "SELECT * FROM report";
+let sql = "SELECT * FROM report WHERE AccessionNo = '2003.020'";
 
 
 try {

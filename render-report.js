@@ -138,15 +138,25 @@ function cleanString( sIn ){
 	return sOut;
 }
 
-
+//
+//  updatePublii - function
+//  ------------
+//
+//  Creates a new post in the publii db for a reserch report 
+//
+//  sClass - Classification Code (used as page title and slug)
+//  sPage - page text in Markdown
+// 
 function updatePublii( sClass, sPage ){
-	var dbPublii = new sqlite3.Database('db.sqlite');  // Use a copy of Publii database
+	var dbPublii = new sqlite3.Database('db.sqlite');  // Publii database  (make a copy!!!)
 
-	var sSQLPost = "INSERT INTO posts( title, slug, text, created_at, modified_at, status, template ) " +
-								"VALUES( ?, ?, ?, ?, ?, ?, ? );"
+	var sSQLPost = "INSERT INTO posts( title, authors, slug, text, created_at, modified_at, status, template ) " +
+								"VALUES( ?, ?, ?, ?, ?, ?, ?, ? );"
 	var sSQLAdditional = "INSERT INTO posts_additional_data( post_id, key, value ) " +
 											"VALUES( ?, ?, ? );"
 
+	dbPublii.configure( "busyTimeout", 10000 );  // Keep SQLite from timing out
+	
 	//
 	// Get reference data from the reference post we are cloning
 	//
@@ -156,34 +166,42 @@ function updatePublii( sClass, sPage ){
 			throw err;
 	  else{
 			dbPublii.get( "SELECT DISTINCT * FROM posts_additional_data "+
-										"WHERE post_ID = '" + postRef.id "' " +
+										"WHERE post_ID = '" + postRef.id + "' " +
 										"AND key = '_core'", 
 										[], ( err, coreRef ) => {
 				if( err )
 					throw err;
 				else{
 					dbPublii.get( "SELECT DISTINCT * FROM posts_additional_data "+
-												"WHERE post_ID = '" + postRef.id "' " +
+												"WHERE post_ID = '" + postRef.id + "' " +
 												"AND key = 'postViewSettings'", 
 												[], ( err, viewRef ) => {
 						if( err )
 							throw err;
 						else{
+							// console.log( "**** Reference" );
+							// console.log( postRef );
+							// console.log( coreRef );
+							// console.log( viewRef );
+							
 							//
 							//  Add the new post to the posts table
 							//
 							dbPublii.run( sSQLPost, 
 													[ sClass,  						// title
+														postRef.authors,    // copy author from reference
 														sClass,  						// slug
 														sPage,							// text
-														rowRef.created_at,	// copy from reference
-														rowRef.modified_at,	// copy from reference
-														rowRef.status,			// copy from reference
+														postRef.created_at,		// copy from reference
+														postRef.modified_at,	// copy from reference
+														postRef.status,				// copy from reference
 														"" ],								// template is empty
-														( err ) => {
+														function ( err ) {  // need to use this syntax to access "this"
 								if( err )
 									throw err;
 								else{
+									console.log( "new post id:", this.lastID );
+									
 									//
 									//  Add the additional post data to posts_additional_data
 									//							
@@ -196,13 +214,13 @@ function updatePublii( sClass, sPage ){
 																viewRef.key,				// copy from reference
 																viewRef.value ] );	// copy from reference
 								}
-							}
+							})
 						}
-					}
+					})
 				}
-			}
+			})
 		}
-	}
+	})
 	
 	dbPublii.close();
 }
@@ -271,7 +289,8 @@ function renderPage( m ){
 		sHead + "Related Reports\n" + m.get( "RelatedReports") + "\n" 
 
 	// console.log( sPage );
-	fs.writeFileSync( ".\\markdown\\" + m.get( "Classification" ) + ".md", sPage );
+	// fs.writeFileSync( ".\\markdown\\" + m.get( "AccessionNo" ) + ".md", sPage );
+	updatePublii( m.get( "Classification" ), sPage );
 }
 
 
@@ -430,7 +449,7 @@ function buildMap( sAccNo ){
 	  if (err)
 			console.log(err.message);
 	  else{
-			console.log('Close the database2 connection.');
+			// console.log('Close the database2 connection.');
 			// console.log( "mapSlices", mapSlices );
 			renderPage( mapSlices );
 			// test( mapSlices );
@@ -459,8 +478,8 @@ function dbCallback( err, row ){
 const sqlite3 = require('sqlite3').verbose();
 
 let db = new sqlite3.Database('reports.sqlite')
-// let sql = "SELECT * FROM report";
-let sql = "SELECT * FROM report WHERE AccessionNo = '2003.020'";
+let sql = "SELECT * FROM report";
+// let sql = "SELECT * FROM report WHERE AccessionNo = '2003.020'";
 
 
 try {

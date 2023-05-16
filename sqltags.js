@@ -11,7 +11,7 @@ var fs = require('fs');
 function tagPosts( ){
 	var dbPublii = new sqlite3.Database('db.sqlite');  // Publii database  (make a copy!!!)
 	var sSQLSelectTags = "SELECT id, name FROM tags WHERE name > '1.00' AND name < '99.99' ORDER BY name;";
-	var sSQLSelectPosts = "SELECT id, title FROM posts  WHERE slug BETWEEN ? AND ?;";
+	var sSQLSelectPosts = "SELECT id, slug FROM posts  WHERE slug BETWEEN '1.00' AND '99.99' ORDER BY slug;";
 	var sSQLAddPostID = "INSERT INTO posts_tags( tag_id, post_id ) VALUES( ?, ? );";
 	
 	//
@@ -23,28 +23,36 @@ function tagPosts( ){
 			throw err;
 	  else{
 			// console.log( rowsTag );
-			var i;
-			for( i=0; i < rowsTag.length-1; i++ ){
-				//
-				//  For all posts with this tag
-				//
-				dbPublii.all(  sSQLSelectPosts,
-											[ rowsTag[i].name, rowsTag[i+1].name ],
-											( err, rowsPost ) => {
-					if( err )
-						throw err;
-					else{
-						//
-						//  Add them to the database
-						//
-						console.log( i, rowsTag[i].id, rowsTag[i].name );
-						console.log( rowsPost );
-						// console.log( i, rowsTag[i].id, rowsTag[i].name, rowPost.id, rowPost.title );
-						// dbPublii.run( sSQLAddPostID,
-						              // [ rowsTag[i].id, rowPost.id ] );
+			//
+			//  For all posts with this tag
+			//
+			dbPublii.each(  sSQLSelectPosts,
+										[], ( err, rowPost ) => {
+				if( err )
+					throw err;
+				else{
+					let sTag = rowPost.slug.slice( 0, rowPost.slug.indexOf( '-' ) );
+					let iTag = 0;
+					while( rowsTag[ iTag ].name != sTag ){
+						iTag++;
+						if( iTag >= rowsTag.length ){
+							throw new Error( "Tag not found for post " + rowPost.slug );
+						}
 					}
-				});
-			}
+						
+					//
+					//  Add them to the database
+					//
+					// console.log(  );
+					// console.log( iTag, sTag );
+					// console.log( rowsTag[iTag].id, rowsTag[iTag].name );
+					// console.log( rowPost );
+					console.log( rowsTag[iTag].id, rowsTag[iTag].name, rowPost.id, rowPost.slug );
+					dbPublii.run( sSQLAddPostID,
+												[ rowsTag[iTag].id, rowPost.id ] );
+				}
+			});
+			
 				
 		//
 		//  Process the posts with the last tag

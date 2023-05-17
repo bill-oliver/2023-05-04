@@ -4,7 +4,7 @@ let db = new sqlite3.Database('reports.sqlite');
 
 console.log('Connected to the database.');
 
-// db.run("INSERT INTO Classifications (Code, Description) VALUES('1.01', 'Unitary Refrig and A/C Equipment and Systems - Household Cabinet Refrigerators')" );
+db.run("INSERT INTO Classifications (Code, Description) VALUES('1.01', 'Unitary Refrig and A/C Equipment and Systems - Household Cabinet Refrigerators')" );
 db.run("INSERT INTO Classifications(Code, Description) VALUES('1.02', 'Unitary Refrig. and A/C Equipment and Systems - Household Air Conditioners')" );
 db.run("INSERT INTO Classifications(Code, Description) VALUES('1.03', 'Unitary Refrig and A/C Equipment and Systems - Commercial Refrigerating Equipment')" );
 db.run("INSERT INTO Classifications(Code, Description) VALUES('10.02', 'Solid Fuel (Coal and Wood) Burning Equipment - Water Heating')" );

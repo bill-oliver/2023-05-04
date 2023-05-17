@@ -1,3 +1,16 @@
+//
+//  Populates tags and and posts_tags tables in Publii db
+//
+//  tags: created from Classifications table in reference database:
+//    name - Classifications.code n.nn
+//    slug - same as name  *** TODO: slug cannot have "." suggest change to nn-nn
+//		description - Classifications.Description
+//
+//  posts_tags: created from tags and posts table in Publii db
+//    tag_id - from tags
+//    post_id - posts with slug starting with the tag name
+//
+
 "use strict";
 
 var fs = require('fs');
@@ -52,22 +65,6 @@ function tagPosts( ){
 												[ rowsTag[iTag].id, rowPost.id ] );
 				}
 			});
-			
-				
-		//
-		//  Process the posts with the last tag
-		//
-		// dbPublii.each( sSQLSelectPosts,
-									// [ rowsTag[i].name, "99.99" ],
-									// ( err, rowPost ) => {
-				// if( err )
-					// throw err;
-				// else{
-					// console.log( rowsTag[rowsTag.length].id, rowsTag[rowsTag.length].name, rowPost.id, rowPost.title );
-					// dbPublii.run( sSQLAddPostID,
-												// [ rowsTag[rowsTag.length].id, rowPost.id ] );
-				// }
-			// });
 		}
 	});
 	

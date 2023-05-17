@@ -1,5 +1,7 @@
 "use strict";
-
+//
+//  populates report table in reports.db from reports in word .doc files 
+//
 var fs = require('fs');
 
 //
@@ -280,7 +282,7 @@ function dbCallback( err, row ){
 //  ----
 //
 const sqlite3 = require('sqlite3').verbose();
-let db = new sqlite3.Database('reports.sqlite')
+let db = new sqlite3.Database('reports.sqlite');
 let sql = "SELECT DISTINCT AccessionNo FROM report WHERE LastModified IS NULL ORDER BY AccessionNo";
 
 try {

@@ -168,7 +168,7 @@ function updatePublii( sClass, sPage ){
 	var sSQLAdditional = "INSERT INTO posts_additional_data( post_id, key, value ) " +
 											"VALUES( ?, ?, ? );"
 
-	dbPublii.configure( "busyTimeout", 10000 );  // Keep SQLite from timing out
+	dbPublii.configure( "busyTimeout", 20000 );  // Keep SQLite from timing out
 	
 	//
 	// Get reference data from the reference post we are cloning
@@ -217,7 +217,8 @@ function updatePublii( sClass, sPage ){
 									
 									//
 									//  Add the additional post data to posts_additional_data
-									//							
+									//
+									dbPublii.serialize();									
 									dbPublii.run( sSQLAdditional, 
 															[ this.lastID,				// ID from post we just added
 																coreRef.key,				// copy from reference
@@ -226,6 +227,7 @@ function updatePublii( sClass, sPage ){
 															[ this.lastID,				// ID from post we just added
 																viewRef.key,				// copy from reference
 																viewRef.value ] );	// copy from reference
+									dbPublii.parallelize();
 								}
 							})
 						}
@@ -235,7 +237,7 @@ function updatePublii( sClass, sPage ){
 		}
 	})
 	
-	dbPublii.close();
+	// dbPublii.close();
 }
 
 //

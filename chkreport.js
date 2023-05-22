@@ -1,7 +1,7 @@
 "use strict";
 //
-//  populates report table in reports.db from reports in word .doc files 
-//  Assumes AccessionNo and Classification has already been populated 
+//  Validates AccessionNo and Classification in the word document against the database
+//  based on readreport.js
 //
 var fs = require('fs');
 
@@ -11,7 +11,7 @@ var fs = require('fs');
 const dataFields = {
 	tokens : [
 		"HHCC Accession No.",
-		" +HHCC Classification Code:",
+		"HHCC Classification Code:",
 		"Last Modified:",
 		"Group:",
 		"Description:",
@@ -132,8 +132,9 @@ function cleanString( sIn ){
 			sOut += "''";				//  This seems to be a quote in word
 		}
 		else if( sChar > '\x7e' ){		//  Unexpected non-ascii character
-			throw new Error( "***** Unexpected char " + sChar.charCodeAt( 0 ) 
+			console.log( "***** Unexpected char " + sChar.charCodeAt( 0 ) 
 							+ " at postion " + i + " in slice: \n" + sIn );
+			sOut += "****"	;				
 		} 
 		else {
 			sOut += sChar;
@@ -158,80 +159,67 @@ function cleanString( sIn ){
 function findSlice( sReport, sToken1, sToken2 ) {
 	let iToken1 = sReport.indexOf( sToken1 ) + sToken1.length;
 	let iToken2 = sReport.indexOf( sToken2, iToken1 );
-	let sSlice = sReport.slice( iToken1, iToken2 );
+	let sSlice = "";
 	
 	// console.log( sToken1, sToken1.length, sToken2, iToken1, iToken2, ":" );
-	// console.log( "Slice: ***", sSlice, "***" );
-	
+		
 	if( iToken1 < 0 ){
-		throw new Error( "Token " + sToken1 + " not found " );      //  **** ERROR ****
+		console.log( "**** Token " + sToken1 + " not found " );      //  **** ERROR ****
 	}
 	else if( iToken2 < 0 ){
-		throw new Error( "Token " + sToken2 + " not found " );      //  **** ERROR ****
+		console.log( "**** Token " + sToken2 + " not found " );      //  **** ERROR ****
+	}
+	else {
+		sSlice = sReport.slice( iToken1, iToken2 );
+
+		//
+		//  CLEAN IT UP 
+		//
+		// console.log( "trimed Slice: ***", sSlice, "***" );
+		// console.log( "Length:", sSlice.length );
+		// console.log( "" );
+		
+		
+		sSlice = cleanString( sSlice );
+		
+		// console.log( sToken1, "***", sSlice, "***" );
+		// console.log( "Length:", sSlice.length );
+		// console.log( "" );
 	}
 
-	//
-	//  CLEAN IT UP 
-	//
-	// console.log( "trimed Slice: ***", sSlice, "***" );
-	// console.log( "Length:", sSlice.length );
-	// console.log( "" );
-	
-	
-	sSlice = cleanString( sSlice );
-	
-	// console.log( sToken1, "***", sSlice, "***" );
-	// console.log( "Length:", sSlice.length );
-	// console.log( "" );
 	return sSlice;
 }
 
 
-//
-//  readTokens - function
-//  ----------
-//
-//  Finds the text corrisponding to tokens in the report and addes them
-//  to the database 
-//
-//  dbReports - reports database object 
-//  sAccessionNo - to be processed
-//  sReport - string containing report text
-//  iToken - index (in dataFields) of token to be found, 
-//           if omitted all tokens are processed
-//
-function readTokens( dbReports, sAccessionNo, sReport, iToken = -1 ){
-	let sSlice;
 
-	/* for( let i=0;  i<tokens.length-1; i++ ){
-	//	console.log( tokens1[i], tokens1[i+1]);
-		sSlice = findSlice( sReport, tokens[i], tokens[i+1] );
+//
+//  CheckXREF - function
+//
+//  Validate the Classification code in the doc against in the database
+//  Populated by sqlxref.js from data in HHCC Artifact Cross Reference Tables.docx.
+//  There are errors in this table!!!
+//
+function CheckXREF( dbReports, sReport, sAccessionNo ){
+	let sRptAccession = findSlice( sReport, dataFields.tokens[0], dataFields.tokens[1] );
+	let sRptClassification = findSlice( sReport, dataFields.tokens[1], dataFields.tokens[2] );
+
+	if( sRptAccession != sAccessionNo ){
+		console.log( "*** ERROR: AccessionNo", sAccessionNo, "in report as", sRptAccession );
 	}
-	 */	
-	let sSQL = "UPDATE report SET ";
-	if( iToken >= 0 ){
-		sSlice = findSlice( sReport, dataFields.tokens[iToken], dataFields.tokens[iToken+1] );
-		sSQL += dataFields.fields[ iToken ] + "='" + sSlice + "',";
-	} 
-	else {
-		//
-		// Read all the tokens in the file (skip the accession no and class code)
-		//
-		for( let i=2;  i<dataFields.tokens.length-1; i++ ){
-		//	console.log( tokens1[i], tokens1[i+1]);
-			sSlice = findSlice( sReport, dataFields.tokens[i], dataFields.tokens[i+1] );
-			sSQL += " " + dataFields.fields[ i ] + "='" + sSlice + "',";
+
+	let sSQL = "SELECT Classification, AccessionNo FROM report WHERE AccessionNo = '" + sAccessionNo + "';";
+	dbReports.all( sSQL, ( err, rows ) => {
+		if( err ){
+			throw err;
 		}
-	}
-	
-	sSQL = sSQL.slice( 0, sSQL.length - 1 );   // REMOVE TERMINATING ","
-	sSQL += " WHERE AccessionNo = '" + sAccessionNo + "';";
-	
-	console.log( "SQL:", sSQL, "\n\n\n" );
-	
-	db.run( sSQL, [], function(err) {
-		if (err) {
-			throw(err);
+		else {
+			if( rows.length > 1 ){
+				console.log( "*** ERROR: Multiple rows found for AccessionNo", sAccessionNo );
+			}
+			else if( rows[0].Classification != sRptClassification ){
+				console.log( "*** ERROR: db", rows[0].AccessionNo, rows[0].Classification, 
+				             "in report as", sRptClassification );
+			}
 		}
 	} );
 }
@@ -245,7 +233,7 @@ function readTokens( dbReports, sAccessionNo, sReport, iToken = -1 ){
 //  dbReports - reports database object 
 //  sAccessionNo - the "Accession number" identifying the report to be processed (e.g. "2003.001")
 //
-function updateReportDB( dbReports, sAccessionNo ) {
+function processReportDB( dbReports, sAccessionNo ) {
 	let sFileName = "./reports/Res. Rpts. Founding Collection " + sAccessionNo + ".doc";
 	
 	//
@@ -262,11 +250,13 @@ function updateReportDB( dbReports, sAccessionNo ) {
 	let iOffset = sReport.indexOf( sHeader );
 	// console.log( "Header offset", iOffset );
 
+	CheckXREF( dbReports, sReport, sAccessionNo );
 	// readTokens( dbReports, sAccessionNo, 
 	            // sReport.slice( iOffset ), 4 );  	// Test one token only
-	readTokens( dbReports, sAccessionNo, 
-	            sReport.slice( iOffset ) );  		// All tokens
+	// readTokens( dbReports, sAccessionNo, 
+	//             sReport.slice( iOffset ) );  		// All tokens
 }
+
 
 //
 //  dbCallback - function
@@ -278,7 +268,8 @@ function dbCallback( err, row ){
 	if( err ){
 		throw err;
 	}
-	updateReportDB( db, row.AccessionNo );
+	processReportDB( db, row.AccessionNo );
+
 }
 	
 //
@@ -287,12 +278,13 @@ function dbCallback( err, row ){
 //
 const sqlite3 = require('sqlite3').verbose();
 let db = new sqlite3.Database('reports.sqlite');
-let sql = "SELECT DISTINCT AccessionNo FROM report WHERE LastModified IS NULL ORDER BY AccessionNo";
+// let sql = "SELECT DISTINCT AccessionNo FROM report WHERE LastModified IS NULL ORDER BY AccessionNo";
+let sql = "SELECT DISTINCT AccessionNo FROM report ORDER BY AccessionNo";
 
 try {
 	// db.serialize();
 	db.each( sql, [], dbCallback );			// Process all items in db
-	// updateReportDB( db, "2003.020" );	// *****TEST ONE REPORT
+	// processReportDB( db, "2003.020" );	// *****TEST ONE REPORT
 }
 catch( e ) {
 	console.error( e.name );

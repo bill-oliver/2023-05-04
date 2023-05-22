@@ -1,3 +1,9 @@
+//
+//  create xref table to cross reference report classification with accession numbers
+//
+//  ****** WARNING! - there are errors in this e.g. 2003.072
+
+
 const sqlite3 = require('sqlite3').verbose();
 let db = new sqlite3.Database('reports.sqlite', (err) => {
   if (err) {
@@ -80,7 +86,7 @@ db.run('INSERT INTO report(AccessionNo, ID, Classification) VALUES( "2003.068", 
 db.run('INSERT INTO report(AccessionNo, ID, Classification) VALUES( "2003.069", 69,	 "6.02-7" )' );
 db.run('INSERT INTO report(AccessionNo, ID, Classification) VALUES( "2003.070", 70,	 "6.02-8" )' );
 db.run('INSERT INTO report(AccessionNo, ID, Classification) VALUES( "2003.071", 71,	 "8.01-1" )' );
-db.run('INSERT INTO report(AccessionNo, ID, Classification) VALUES( "2003.072", 72,	 "8.02-3" )' );
+db.run('INSERT INTO report(AccessionNo, ID, Classification) VALUES( "2003.072", 72,	 "8.02-3" )' ); // WRONG!!! SHOULD BE 8.02-1
 db.run('INSERT INTO report(AccessionNo, ID, Classification) VALUES( "2003.073", 73,	 "8.01-2" )' );
 db.run('INSERT INTO report(AccessionNo, ID, Classification) VALUES( "2003.074", 74,	 "8.02-2" )' );
 db.run('INSERT INTO report(AccessionNo, ID, Classification) VALUES( "2003.075", 75,	 "8.03-1" )' );

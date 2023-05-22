@@ -11,6 +11,7 @@ function ProcessImages() {
     let sSQLImage = "INSERT INTO Images( ReportID, ImageFile ) VALUES( ?, ? );";
     let sPath = ".\\Images";
     let ImageFiles = fs.readdirSync( sPath );
+
  
     dbReports.each( "SELECT DISTINCT ID, Classification FROM report", [],
                     ( err, rowReport ) => {
@@ -18,13 +19,36 @@ function ProcessImages() {
             throw err;
         }
         else {
+            let sMask = "^" + rowReport.Classification.toLowerCase();
+            let iDot = sMask.indexOf( "." );
+            if( iDot > 0 ){
+                sMask = sMask.slice( 0, iDot ) + "\\" + sMask.slice( iDot );
+            }
+            sMask += "[a-z]*\\.jpg";
+
+            // console.log( "\n", sMask );
+
+            let iFound = 0;
             for( let i=0; i<ImageFiles.length; i++ ){
-                if( ImageFiles[i].startsWith( rowReport.Classification) ){
-                    // console.log( rowReport.ID, rowReport.Classification, ImageFiles[i]  );
-					dbReports.run( sSQLImage,
-                                 [ rowReport.ID,
-                                   ImageFiles[i] ] );
+                if( ImageFiles[i].toLowerCase().match( sMask ) ){
+                    iFound++;
+                    // console.log( ImageFiles[i] );
                 }
+
+
+                // if( ImageFiles[i].startsWith( rowReport.Classification) ){
+                //     // console.log( rowReport.ID, rowReport.Classification, ImageFiles[i]  );
+				// 	dbReports.run( sSQLImage,
+                //                  [ rowReport.ID,
+                //                    ImageFiles[i] ] );
+                // }
+
+                
+            }
+
+            if( iFound == 0 ){
+                console.log( "**** No images found for", 
+                            rowReport.Classification );
             }
         }
     })

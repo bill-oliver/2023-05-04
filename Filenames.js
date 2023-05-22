@@ -1,26 +1,45 @@
 //
-// Rename image files
+// Clean up image file names
 //
 var fs = require('fs');
 
 function fixImageFiles(){
-    let sPath = ".//images";
+    let sPath = ".//images";  // all images in sub folder
 
-    let ImageFiles = fs.readdirSync( sPath );
+    let ImageFiles = fs.readdirSync( sPath );  // read them in
     //console.log(ImageFiles);
     
     sPath += "//";
 
     for( let i=0; i<ImageFiles.length; i++){
 
-        if( ImageFiles[i].toLowerCase().indexOf(".jpg") < 0 ){
-            throw new Error( ImageFiles[i] + "  is not a jpg********");
+        sNew = ImageFiles[i].toLowerCase();
+
+        if( sNew.indexOf(".jpg") < 0 ){
+            throw new Error( sNew + "  is not a jpg********");
         }
 
-        let iStrip = ImageFiles[i].indexOf(" (");
+        //
+        //  orginal files have a number in brackets after the name
+        //  i.e. "1.02-3a (12).jpg"
+        //
+        let iStrip = sNew.indexOf(" (");
         if( iStrip > 0 ){
-            let sNew = ImageFiles[i].slice( 0, iStrip ) + ".jpg";
-//            console.log( ImageFiles[i], "->", sNew );
+            sNew = sNew.slice( 0, iStrip ) + ".jpg";
+        }
+
+        //
+        // some files have a second dot instead of a dash
+        //  i.e. "1.02.3a.jpg"
+        //
+        let iDot = sNew.indexOf( "." );
+        iDot = sNew.indexOf( ".", iDot + 1 );
+        if( sNew.charAt( iDot+1 ) != "j" ){
+            sNew = sNew.slice( 0, iDot ) + "-" + sNew.slice( iDot+1 );
+        }
+
+        if( sNew != ImageFiles[i] ){
+            // console.log( ImageFiles[i], "->", sNew );
             fs.renameSync( sPath + ImageFiles[i], sPath + sNew );
         }
     }

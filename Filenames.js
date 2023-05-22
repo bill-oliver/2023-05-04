@@ -19,7 +19,7 @@ function fixImageFiles(){
 
         let iStrip = ImageFiles[i].indexOf(" (");
         if( iStrip > 0 ){
-            let sNew = ImageFiles[i].slice( 0, iStrip-1 ) + ".jpg";
+            let sNew = ImageFiles[i].slice( 0, iStrip ) + ".jpg";
 //            console.log( ImageFiles[i], "->", sNew );
             fs.renameSync( sPath + ImageFiles[i], sPath + sNew );
         }

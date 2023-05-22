@@ -1,0 +1,49 @@
+//
+//  Populate the Reports db Images table with the filenames of the
+//  images for each report
+//
+"use strict";
+
+var fs = require('fs');
+
+function ProcessImages() {
+    var dbReports = new sqlite3.Database('reports.sqlite');
+    let sSQLImage = "INSERT INTO Images( ReportID, ImageFile ) VALUES( ?, ? );";
+    let sPath = ".\\Images";
+    let ImageFiles = fs.readdirSync( sPath );
+ 
+    dbReports.each( "SELECT DISTINCT ID, Classification FROM report", [],
+                    ( err, rowReport ) => {
+        if( err ){
+            throw err;
+        }
+        else {
+            for( let i=0; i<ImageFiles.length; i++ ){
+                if( ImageFiles[i].startsWith( rowReport.Classification) ){
+                    // console.log( rowReport.ID, rowReport.Classification, ImageFiles[i]  );
+					dbReports.run( sSQLImage,
+                                 [ rowReport.ID,
+                                   ImageFiles[i] ] );
+                }
+            }
+        }
+    })
+}
+
+
+
+
+//
+//  Main
+//  ----
+//
+const sqlite3 = require('sqlite3').verbose();
+
+try {
+	ProcessImages();
+}
+catch( e ) {
+	console.error( e.name );
+	console.error( e.message );
+}
+

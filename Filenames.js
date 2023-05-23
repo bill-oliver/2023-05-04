@@ -39,7 +39,7 @@ function fixImageFiles(){
         }
 
         if( sNew != ImageFiles[i] ){
-            // console.log( ImageFiles[i], "->", sNew );
+            console.log( ImageFiles[i], "->", sNew );
             fs.renameSync( sPath + ImageFiles[i], sPath + sNew );
         }
     }

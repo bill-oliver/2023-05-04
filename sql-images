@@ -33,17 +33,10 @@ function ProcessImages() {
                 if( ImageFiles[i].toLowerCase().match( sMask ) ){
                     iFound++;
                     // console.log( ImageFiles[i] );
+					dbReports.run( sSQLImage,
+                                 [ rowReport.ID,
+                                   ImageFiles[i] ] );
                 }
-
-
-                // if( ImageFiles[i].startsWith( rowReport.Classification) ){
-                //     // console.log( rowReport.ID, rowReport.Classification, ImageFiles[i]  );
-				// 	dbReports.run( sSQLImage,
-                //                  [ rowReport.ID,
-                //                    ImageFiles[i] ] );
-                // }
-
-                
             }
 
             if( iFound == 0 ){

@@ -106,7 +106,7 @@ const dataFields = {
 }
 
 //
-//  cleanMDString - function  ***NOT USED***
+//  cleanMDString - function  ***NOT NEEDED??***
 //  -------------
 //
 //  Cleans up the block of text retrieved by findSlice
@@ -241,10 +241,36 @@ function updatePublii( sClass, sPage ){
 }
 
 //
+//  insertGallery - function
+//  -------------
+//
+//  Returns the html text to build a gallery containing the specified images.
+//
+//  Gallery code taken from html file created by wsw editor
+//
+//    ImagesFiles - Array with the filenames of the images
+//
+function insertGallery( ImageFiles ){
+
+	let sRet = '<div class="gallery gallery-wrapper--full" contenteditable="false" '
+			+  'data-is-empty="false" data-translation="Add images" data-columns="6">\n';
+
+	for( let i=0; i<ImageFiles.length; i++ ){
+		sRet += '<figure class=gallery__item><a href="#DOMAIN_NAME#gallery/' + ImageFiles[i] + '" data-size="512x768">' 
+			 + '<img src="#DOMAIN_NAME#gallery/' + ImageFiles[i] + '-thumbnail.jpg" alt="" width="512" height="768"></a></figure>\n'; 
+	}
+
+	sRet += "</div>\n";
+
+	return sRet;
+}
+
+
+//
 //  renderPage - function
 //  ----------
 //
-//  Builds the Markdown Reasearch Report web page in a global string
+//  Builds the Markdown Research Report web page in a global string
 //
 //    m - Map containing the fields and the associated text 
 //         (built by buildMap function)
@@ -255,6 +281,12 @@ function renderPage( m ){
 	// db.serialize();
 	
 	const sHead = "##### ";   // Use heading level 5 for section headers
+	const sGalleryBlock = "\n<details>\n	<summary>Images:</summary>\n";
+	const sDetailsBlock = "\n<details>\n	<summary>Details:</summary>\n";
+	const sEndBlock = "</details>\n"
+
+
+	let sClassification = m.get( "Classification" );
 	
 	sPage = 
 		// "<div align='center'>Research Reports</div>\n" +
@@ -263,12 +295,15 @@ function renderPage( m ){
 		"| **HHCC Accession No. " + m.get( "AccessionNo" ) + 
 		"** |**HHCC Classification Code:  " + m.get( "Classification" ) + "**|\n" +
 		"| ----------- | ----------- |\n\n" +
-		
-		sHead + "Last Modified:\n" + m.get( "LastModified" ) + "\n\n" +
-		sHead + "Group:\n" + m.get( "Grp" ) + "\n\n" +
 		sHead + "Description:\n" + m.get( "Description" ) + "\n\n" +
-		sHead + "Film Image:\n" + m.get( "FilmImage"  ) + "\n\n" +
-		sHead + "Digital Image:\n" + m.get( "DigitalImage"  ) + "\n\n" +
+
+		sGalleryBlock + insertGallery( m.get( "ImageFiles" ) ) + sEndBlock +		// Gallery goes here
+
+		sDetailsBlock +														// Rest are "Details"
+		sHead + "Group:\n" + m.get( "Grp" ) + "\n\n" +
+		// sHead + "Last Modified:\n" + m.get( "LastModified" ) + "\n\n" +
+		// sHead + "Film Image:\n" + m.get( "FilmImage"  ) + "\n\n" +
+		// sHead + "Digital Image:\n" + m.get( "DigitalImage"  ) + "\n\n" +
 		sHead + "Make:\n" + m.get( "Make"  ) + "\n\n" +
 		sHead + "Manufacturer:\n" + m.get( "Manufacturer"  ) + "\n\n" +
 		sHead + "Model:\n" + m.get( "Model"  ) + "\n\n" +
@@ -283,7 +318,7 @@ function renderPage( m ){
 		sHead + "Construction:\n" + m.get( "Construction"  ) + "\n\n" +
 		sHead + "Material:\n" + m.get( "Material"  ) + "\n\n" +
 		sHead + "Special Features:\n" + m.get( "SpecialFeatures"  ) + "\n\n" +
-		sHead + "Accessories\n" + m.get( "Accessories"  ) + "\n\n" +
+		sHead + "Accessories:\n" + m.get( "Accessories"  ) + "\n\n" +
 		sHead + "Capacities:\n" + m.get( "Capacities"  ) + "\n\n" +
 		sHead + "Performance Characteristics:\n" + m.get( "PerformanceCharacteristics"  ) + "\n\n" +
 		sHead + "Operation:\n" + m.get( "Operation"  ) + "\n\n" +
@@ -301,11 +336,12 @@ function renderPage( m ){
 		sHead + "Tracking:\n" + m.get( "Tracking"  ) + "\n\n" +
 		sHead + "Bibliographic References:\n" + m.get( "BiblioRef"  ) + "\n\n" +
 		sHead + "Notes:\n" + m.get( "Notes"  ) + "\n\n" +
-		sHead + "Related Reports\n" + m.get( "RelatedReports") + "\n" 
+		sHead + "Related Reports:\n" + m.get( "RelatedReports") + "\n" +
+		sEndBlock;                                                         // End of details
 
 	// console.log( sPage );
-	// fs.writeFileSync( ".\\markdown\\" + m.get( "AccessionNo" ) + ".md", sPage );
-	updatePublii( m.get( "Classification" ), sPage );
+	fs.writeFileSync( ".\\markdown\\" + m.get( "AccessionNo" ) + ".md", sPage );
+	// updatePublii( m.get( "Classification" ), sPage );
 }
 
 
@@ -328,7 +364,7 @@ function buildMap( sAccNo ){
 		return sSQL;
 	}
 
-	var mapSlices = new Map();
+	var mapSlices = new Map();    // Map will contain the slice of text for each field
 	var i = 0;
 	
 	if( dataFields.fields.length != 41 ){
@@ -457,6 +493,19 @@ function buildMap( sAccNo ){
 		});
 	});
 	
+
+	//
+	//  Add the list of image files
+	//
+	const sSQLImages = "SELECT ALL ImageFile FROM report CROSS JOIN Images WHERE Images.ReportID=report.ID AND report.AccessionNo = (?);"
+	db2.all( sSQLImages, [sAccNo], (err, rows ) => {
+		let Files = [];
+		for( let i=0; i<rows.length; i++ ){
+			Files[i]=rows[i].ImageFile;
+		}
+		mapSlices.set( "ImageFiles", Files );
+	} );
+
 	//
 	//  Must wait for the close to complete before we can use the Map
 	//
@@ -493,8 +542,8 @@ function dbCallback( err, row ){
 const sqlite3 = require('sqlite3').verbose();
 
 let db = new sqlite3.Database('reports.sqlite')
-let sql = "SELECT * FROM report";
-// let sql = "SELECT * FROM report WHERE AccessionNo = '2003.020'";
+// let sql = "SELECT * FROM report";
+let sql = "SELECT * FROM report WHERE AccessionNo = '2003.001'";
 
 
 try {

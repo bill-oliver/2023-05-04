@@ -1,5 +1,5 @@
 //
-//  Populate the Reports db ReprtTitles table 
+//  Populate the Reports db ReportTitles table 
 //
 "use strict";
 
@@ -349,7 +349,27 @@ const sTitles = [
     "2006.220: 1938 Pipe Threading Stock and Dies" ];
 
 //
-//  Callback for Database.each function
+//  FixReportTitles: Callback for Database.each function
+//  
+//  Fixes the report title (we intended to use the Classification code 
+//  instead of the accession number)
+//
+function FixReportTitles( err, row ){
+	if( err ){
+		throw err;
+	}
+
+	let sSQL = "UPDATE ReportTitles SET Title = ? WHERE ReportID = ?;";
+	let sTitle = row.Classification + row.Title.slice( 8 );
+
+    // console.log( sTitle );
+    db.run( sSQL, [ sTitle, row.ReportID ] );
+}
+
+//
+//  ProcessReportTitles: Callback for Database.each function
+//  
+//  Adds the title to each report.
 //
 function ProcessReportTitles( err, row ){
 	if( err ){
@@ -377,10 +397,13 @@ function ProcessReportTitles( err, row ){
 const sqlite3 = require('sqlite3').verbose();
 
 let db = new sqlite3.Database('reports.sqlite')
-let sql = "SELECT ID, AccessionNo FROM report";
+// let sql = "SELECT ID, AccessionNo FROM report";
+let sql = "SELECT ReportID,Title,Classification  FROM report CROSS JOIN ReportTitles WHERE report.ID = ReportTitles.ReportID";
 
 try {
-	db.each( sql, [], ProcessReportTitles );			// Process all items in db
+	// db.each( sql, [], ProcessReportTitles );			// Process all items in db
+	db.each( sql, [], FixReportTitles );			// Process all items in db
+
 }
 catch( e ) {
 	console.error( e.name );

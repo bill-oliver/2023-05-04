@@ -256,8 +256,10 @@ function insertGallery( ImageFiles ){
 			+  'data-is-empty="false" data-translation="Add images" data-columns="6">\n';
 
 	for( let i=0; i<ImageFiles.length; i++ ){
-		sRet += '<figure class=gallery__item><a href="#DOMAIN_NAME#gallery/' + ImageFiles[i] + '" data-size="512x768">' 
-			 + '<img src="#DOMAIN_NAME#gallery/' + ImageFiles[i] + '-thumbnail.jpg" alt="" width="512" height="768"></a></figure>\n'; 
+		let sFN = ImageFiles[i];
+		let sNoType = sFN.slice( 0, sFN.lastIndexOf(".") );
+		sRet += '<figure class="gallery__item"><a href="#DOMAIN_NAME#gallery/' + sFN + '" data-size="512x768">' 
+			 + '<img src="#DOMAIN_NAME#gallery/' + sNoType + '-thumbnail.jpg" alt="" width="512" height="768"></a></figure>\n'; 
 	}
 
 	sRet += "</div>\n";

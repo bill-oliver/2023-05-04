@@ -345,8 +345,8 @@ function renderPage( m, imgs ){
 		sEndBlock;                                                         // End of details
 
 	// console.log( sPage );
-	fs.writeFileSync( ".\\markdown\\" + m.get( "AccessionNo" ) + ".md", sPage );
-	// updatePublii( m.get( "Classification" ), sPage );
+	// fs.writeFileSync( ".\\markdown\\" + m.get( "AccessionNo" ) + ".md", sPage );
+	updatePublii( m.get( "Classification" ), sPage );
 }
 
 
@@ -554,8 +554,8 @@ function dbCallback( err, row ){
 const sqlite3 = require('sqlite3').verbose();
 
 let db = new sqlite3.Database('reports.sqlite')
-// let sql = "SELECT * FROM report";
-let sql = "SELECT * FROM report WHERE AccessionNo = '2003.051'";
+let sql = "SELECT * FROM report";
+// let sql = "SELECT * FROM report WHERE AccessionNo = '2003.051'";
 // let sql = "SELECT * FROM report WHERE AccessionNo = '2003.001'";
 
 

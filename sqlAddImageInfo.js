@@ -10,6 +10,10 @@ const fs = require('fs');
 const piexif = require('piexifjs');
 
 
+// Handy utility functions
+const getBase64DataFromJpegFile = filename => fs.readFileSync(filename).toString('binary');
+const getExifFromJpegFile = filename => piexif.load(getBase64DataFromJpegFile(filename));
+
 // Given a Piexifjs object, this function displays its Exif tags
 // in a human-readable format
 function debugExif(exif) {
@@ -27,29 +31,31 @@ function debugExif(exif) {
 }
 
 
-function ReadImages() {
+function ProcessImages() {
     var dbReports = new sqlite3.Database('reports.sqlite');
     // let sSQLImage = "INSERT INTO Images( ReportID, ImageFile ) VALUES( ?, ? );";
     let sPath = ".\\Images";
     let ImageFiles = fs.readdirSync( sPath );
 
 	for( let i=0; i<ImageFiles.length; i++ ){
-		if( ImageFiles[i].toLowerCase().match( sMask ) ){
-			iFound++;
-			// console.log( ImageFiles[i] );
-			dbReports.run( sSQLImage,
-						 [ rowReport.ID,
-						   ImageFiles[i] ] );
-		}
+		let ImageData = getExifFromJpegFile( sPath + "\\" + ImageFiles[i] );
+		debugExif( ImageData );
 	}
 }
 
-const palm1Exif = getExifFromJpegFile("./images/palm tree 1.jpg");
-const piexif = require('piexifjs');
+//
+//  Main
+//  ----
+//
+const sqlite3 = require('sqlite3').verbose();
 
-// Handy utility functions
-const getBase64DataFromJpegFile = filename => fs.readFileSync(filename).toString('binary');
-const getExifFromJpegFile = filename => piexif.load(getBase64DataFromJpegFile(filename));
+try {
+	ProcessImages();
+}
+catch( e ) {
+	console.error( e.name );
+	console.error( e.message );
+}
 
 
 

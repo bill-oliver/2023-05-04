@@ -1,13 +1,13 @@
 //
 //  Add inofrmation for jpg images to report db
 //
-//  Uses the node-exifs library (https://github.com/gomfunkel/node-exif)
+//  Uses the image-size library (https://github.com/image-size/image-size)
 //
 "use strict";
 
 const fs = require('fs');
-// const EXIF = require('exif');
-var ExifImage = require('exif').ExifImage;
+
+const sizeOf = require('image-size')
 
 
 function ProcessImages() {
@@ -18,29 +18,13 @@ function ProcessImages() {
 
 	for( let i=0; i<ImageFiles.length; i++ ){
 		var sImg = sPath + "\\" + ImageFiles[i];
-		// var sImg = "..\\temp\\PXL_20230517_223041446.jpg";
-	    new ExifImage({ image : sImg }, function (error, exifData) {
-		// EXIF.loadImage( sImg, function (error, exifData) {
-			if (error)
-				throw error;
-			else
-				console.log(exifData); // Do something with your data!
-		});
+		const dimensions = sizeOf( sImg );
+		console.log( ImageFiles[i], dimensions.width, dimensions.height );
 	}
 }
 
-
-// try {
-//     new ExifImage({ image : 'myImage.jpg' }, function (error, exifData) {
-//         if (error)
-//             console.log('Error: '+error.message);
-//         else
-//             console.log(exifData); // Do something with your data!
-//     });
-// } catch (error) {
-//     console.log('Error: ' + error.message);
-// }
-
+// const dimensions = sizeOf('images/funny-cats.png')
+// console.log(dimensions.width, dimensions.height)
 
 //
 //  Main

@@ -248,7 +248,7 @@ function updatePublii( sClass, sPage ){
 //
 //  Gallery code taken from html file created by wsw editor
 //
-//    ImagesFiles - Array with the filenames of the images
+//    ImagesFiles - Array with image information
 //
 function insertGallery( ImageFiles ){
 
@@ -256,17 +256,19 @@ function insertGallery( ImageFiles ){
 			+  'data-is-empty="false" data-translation="Add images" data-columns="6">\n';
 
 	for( let i=0; i<ImageFiles.length; i++ ){
-		let sFN = ImageFiles[i];
+		let sFN = ImageFiles[i].get( "Fn" );
+		let iHt = ImageFiles[i].get( "Ht" );
+		let iWd = ImageFiles[i].get( "Wd" );
 		let sNoType = sFN.slice( 0, sFN.lastIndexOf(".") );
-		sRet += '<figure class="gallery__item"><a href="#DOMAIN_NAME#gallery/' + sFN + '" data-size="512x768">' 
-			 + '<img src="#DOMAIN_NAME#gallery/' + sNoType + '-thumbnail.jpg" alt="" width="512" height="768"></a></figure>\n'; 
+		sRet += '<figure class="gallery__item"><a href="#DOMAIN_NAME#gallery/' + sFN 
+			 + '" data-size="' + iWd + "x" + iHt + '">' 
+			 + '<img src="#DOMAIN_NAME#gallery/' + sNoType + '-thumbnail.jpg" alt=""></a></figure>\n'; 
 	}
 
 	sRet += "</div>\n";
 
 	return sRet;
 }
-
 
 //
 //  renderPage - function
@@ -275,16 +277,17 @@ function insertGallery( ImageFiles ){
 //  Builds the Markdown Research Report web page in a global string
 //
 //    m - Map containing the fields and the associated text 
-//         (built by buildMap function)
+//    imgs - array of image data associated with this object
+//  (populated by buildMap function)
 //
 var sPage;                    //  Global string buffer for the rendered page
 
-function renderPage( m ){
+function renderPage( m, imgs ){
 	// db.serialize();
 	
 	const sHead = "##### ";   // Use heading level 5 for section headers
-	const sGalleryBlock = "\n<details>\n	<summary>Images:</summary>\n";
-	const sDetailsBlock = "\n<details>\n	<summary>Details:</summary>\n";
+	const sGalleryBlock = "\n\n<details>\n	<summary>Images:</summary>\n";
+	const sDetailsBlock = "\n\n<details>\n	<summary>Details:</summary>\n\n";
 	const sEndBlock = "</details>\n"
 
 
@@ -296,10 +299,10 @@ function renderPage( m ){
 		// "<div align='center'>The Artifacts of HVACR Technology, Canada’s First Half Century</div>\n\n" +
 		"| **HHCC Accession No. " + m.get( "AccessionNo" ) + 
 		"** |**HHCC Classification Code:  " + m.get( "Classification" ) + "**|\n" +
-		"| ----------- | ----------- |\n\n" +
-		sHead + "Description:\n" + m.get( "Description" ) + "\n\n" +
+		"| ----------- | ----------- |\n" +
+		sHead + "Description:\n" + m.get( "Description" ) + "\n" +
 
-		sGalleryBlock + insertGallery( m.get( "ImageFiles" ) ) + sEndBlock +		// Gallery goes here
+		sGalleryBlock + insertGallery( imgs ) + sEndBlock +		// Gallery goes here
 
 		sDetailsBlock +														// Rest are "Details"
 		sHead + "Group:\n" + m.get( "Grp" ) + "\n\n" +
@@ -497,19 +500,26 @@ function buildMap( sAccNo ){
 	
 
 	//
-	//  Add the list of image files
+	//  Add the list of image information
 	//
-	const sSQLImages = "SELECT ALL ImageFile FROM report CROSS JOIN Images WHERE Images.ReportID=report.ID AND report.AccessionNo = (?);"
+	var Images = [];			// Array  to store the images in
+
+	const sSQLImages = "SELECT ALL ImageFile,Width,Height FROM report CROSS JOIN Images WHERE Images.ReportID=report.ID AND report.AccessionNo = (?);"
 	db2.all( sSQLImages, [sAccNo], (err, rows ) => {
-		let Files = [];
 		for( let i=0; i<rows.length; i++ ){
-			Files[i]=rows[i].ImageFile;
+			let ImgInf = new Map( [
+								[ "Fn", rows[i].ImageFile ],
+								[ "Ht", rows[i].Height ],
+								[ "Wd", rows[i].Width ]
+								]);
+
+			Images[i]=ImgInf;
 		}
-		mapSlices.set( "ImageFiles", Files );
+		mapSlices.set( "ImageFiles", Images );
 	} );
 
 	//
-	//  Must wait for the close to complete before we can use the Map
+	//  Must wait for the close to complete before we can access the Data
 	//
 	db2.close((err) => {
 	  if (err)
@@ -517,7 +527,7 @@ function buildMap( sAccNo ){
 	  else{
 			// console.log('Close the database2 connection.');
 			// console.log( "mapSlices", mapSlices );
-			renderPage( mapSlices );
+			renderPage( mapSlices, Images );
 			// test( mapSlices );
 	  }
 	});
@@ -545,7 +555,8 @@ const sqlite3 = require('sqlite3').verbose();
 
 let db = new sqlite3.Database('reports.sqlite')
 // let sql = "SELECT * FROM report";
-let sql = "SELECT * FROM report WHERE AccessionNo = '2003.001'";
+let sql = "SELECT * FROM report WHERE AccessionNo = '2003.051'";
+// let sql = "SELECT * FROM report WHERE AccessionNo = '2003.001'";
 
 
 try {

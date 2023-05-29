@@ -1,0 +1,3 @@
+1) AC units classified as refrigeration units (1.01-8, 1.01-9) should be 1.02-x (fixed on website)
+2) 11.06-1 reclassified as 11.01-1: duplicate images
+3) Image exists for 10.5.1 but no research report (similar to 10.08-1)

@@ -1,8 +1,8 @@
 //
 //  Creates posts in Publii db from report data in report.db
 //
-//  title: classification Number
-//  slug:  same as title
+//  title: classification Number (changed later)
+//  slug:  classification Number
 //  text: Report post
 //  remainning fields are cloned from post record with slug == "reference"
 //

@@ -1,0 +1,2 @@
+1) references to inventory numbers in description etc.
+2) should have hotlinks to crossreferences

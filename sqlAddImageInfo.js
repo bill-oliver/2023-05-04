@@ -7,28 +7,7 @@
 "use strict";
 
 const fs = require('fs');
-const piexif = require('piexifjs');
-
-
-// Handy utility functions
-const getBase64DataFromJpegFile = filename => fs.readFileSync(filename).toString('binary');
-const getExifFromJpegFile = filename => piexif.load(getBase64DataFromJpegFile(filename));
-
-// Given a Piexifjs object, this function displays its Exif tags
-// in a human-readable format
-function debugExif(exif) {
-    for (const ifd in exif) {
-        if (ifd == 'thumbnail') {
-            const thumbnailData = exif[ifd] === null ? "null" : exif[ifd];
-            console.log(`- thumbnail: ${thumbnailData}`);
-        } else {
-            console.log(`- ${ifd}`);
-            for (const tag in exif[ifd]) {
-                console.log(`    - ${piexif.TAGS[ifd][tag]['name']}: ${exif[ifd][tag]}`);
-            }
-        }
-    }
-}
+const EXIF = require('exif-js');
 
 
 function ProcessImages() {
@@ -38,8 +17,12 @@ function ProcessImages() {
     let ImageFiles = fs.readdirSync( sPath );
 
 	for( let i=0; i<ImageFiles.length; i++ ){
-		let ImageData = getExifFromJpegFile( sPath + "\\" + ImageFiles[i] );
-		debugExif( ImageData );
+		var sImg = sPath + "\\" + ImageFiles[i];
+		EXIF.getData( sImg, function() {
+			var allMetaData = EXIF.getAllTags(this);
+			console.log( allMetaData );
+		});
+	
 	}
 }
 

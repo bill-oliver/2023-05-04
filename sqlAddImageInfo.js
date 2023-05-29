@@ -12,14 +12,15 @@ const sizeOf = require('image-size')
 
 function ProcessImages() {
     var dbReports = new sqlite3.Database('reports.sqlite');
-    // let sSQLImage = "INSERT INTO Images( ReportID, ImageFile ) VALUES( ?, ? );";
+    let sSQL = "UPDATE Images SET Height = ?, Width = ? WHERE ImageFile = ?;";
     let sPath = ".\\Images";
     let ImageFiles = fs.readdirSync( sPath );
 
 	for( let i=0; i<ImageFiles.length; i++ ){
 		var sImg = sPath + "\\" + ImageFiles[i];
 		const dimensions = sizeOf( sImg );
-		console.log( ImageFiles[i], dimensions.width, dimensions.height );
+		// console.log( ImageFiles[i], dimensions.width, dimensions.height );
+		dbReports.run( sSQL, [dimensions.height, dimensions.width, ImageFiles[i] ] );
 	}
 }
 

@@ -1,6 +1,5 @@
 //
 //  Adds tags to the Publii db from Classifications in report.db
-//  and links them to the correct report (posts)
 //
 // 
 //

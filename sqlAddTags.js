@@ -13,6 +13,19 @@ const sqlite3 = require('sqlite3').verbose();
 const sTagData1 = '{"viewConfig":{},"featuredImage":"';
 const sTagData2 = '","featuredImageAlt":"","featuredImageCaption":"","featuredImageCredits":"","isHidden":false,"metaTitle":"","metaDescription":"","metaRobots":"","canonicalUrl":"","template":""}';
 
+//
+//  AddTag - Adds a tag to the Publii database from Classifications table
+//
+//   row - row structure from Classifications table
+//
+function AddTag( row ){
+	let dbPublii = new sqlite3.Database('db.sqlite');
+	var sSQL = "INSERT INTO tags( name, slug, description, additional_data ) " +
+						 "VALUES( ?, ?, ?, ? );";
+	
+	dbPublii.run( sSQL, [ row.Tag, row.Code, row.Description, 
+						  sTagData1 + row.Image + sTagData2  ] );
+}
 
 //
 //  dbCallback - function
@@ -25,7 +38,7 @@ function dbCallback( err, row ){
 		throw err;
 	}
 	// renderPage( db, row );
-	buildMap( row.AccessionNo );
+	AddTag( row);
 }
 	
 //

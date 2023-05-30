@@ -1,5 +1,6 @@
 //
-//  Add inofrmation for jpg images to report db
+//  Add information for jpg images to report db 
+//  (required to get aspect ratios right on gallery images)
 //
 //  Uses the image-size library (https://github.com/image-size/image-size)
 //

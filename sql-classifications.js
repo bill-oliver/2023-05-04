@@ -1,3 +1,6 @@
+//
+//  Creates classification table in the report db
+//
 "use strict";
 const sqlite3 = require('sqlite3').verbose();
 let db = new sqlite3.Database('reports.sqlite');

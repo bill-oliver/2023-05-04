@@ -35,7 +35,7 @@ function AddPostTags( sClassification ){
 		}
 
 		// console.log( sClassification, GetTag( sClassification ), row );
-		dbPublii.run( sSQLPostTags, [ GetTag( sClassification ), row.id ] );
+		dbPublii.run( sSQLPostTags, [ GetTag( sClassification ), row.id ] );  ///???? tag_id?
 	} );
 }
 

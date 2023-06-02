@@ -1,5 +1,8 @@
 //
 //  Associates posts with their featured image in the Publii db 
+//  Also adds post title
+//
+//  Image must be both in posts and posts_images tabels
 //
 //   Currently we use the first image for that classification code in the
 //   Images table 
@@ -22,7 +25,7 @@ const sAdditionalData= '{"alt":"","caption":"","credits":""}';
 //   ReportID - id from report table
 //   sClassification - Classification code for report
 //
-function AddPostImage( sClassification, sReportID  ){
+function AddPostImage( sTitle, sClassification, sReportID  ){
     dbReport.get( "SELECT ImageFile from Images WHERE ReportID = ?;", [sReportID],
                     (err, row) => {
 		if( err || row === null ){
@@ -37,9 +40,18 @@ function AddPostImage( sClassification, sReportID  ){
                 throw new Error( "No post for" + sClassification );
             }
 
+			var iPostID = row.id;
 			console.log( sClassification, sImage );
 			dbPublii.run( "INSERT INTO posts_images( post_id, url, additional_data ) "
-			  			+ "VALUES( ?, ?, ? );", [ row.id, sImage, sAdditionalData ] );
+			  			+ "VALUES( ?, ?, ? );", [ iPostID, sImage, sAdditionalData ],
+						function( err, row ) {
+				if( err ){
+					throw err;
+				}
+				console.log( sClassification, sTitle );
+				dbPublii.run( "UPDATE posts SET title=?, featured_image_id=? WHERE id=?;",
+							[ sTitle, this.lastID, iPostID ] );
+			});
 		});
 	} );
 }
@@ -54,7 +66,7 @@ function dbCallback( err, row ){
 	if( err ){
 		throw err;
 	}
-	AddPostImage( row.Classification, row.ID  );
+	AddPostImage(  row.Title, row.Classification, row.ID );
 }
 	
 //
@@ -62,7 +74,8 @@ function dbCallback( err, row ){
 //  ----
 //
 
-let sSQL = "SELECT Classification, ID FROM report;"
+let sSQL = "SELECT Title, Classification, ID FROM report CROSS JOIN ReportTitles "
+		 + "WHERE ReportTitles.ReportID = report.ID;";
 
 try {
 	dbReport.each( sSQL, [], dbCallback );			// Process all items in db

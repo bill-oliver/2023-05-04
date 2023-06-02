@@ -1,6 +1,6 @@
 //
 //  Associates posts with their featured image in the Publii db 
-//  Also adds post title
+//  and adds post title
 //
 //  Image must be both in posts and posts_images tabels
 //
@@ -74,7 +74,7 @@ function dbCallback( err, row ){
 //  ----
 //
 
-let sSQL = "SELECT Title, Classification, ID FROM report CROSS JOIN ReportTitles "
+let sSQL = "SELECT Title, Classification, report.ID FROM report CROSS JOIN ReportTitles "
 		 + "WHERE ReportTitles.ReportID = report.ID;";
 
 try {

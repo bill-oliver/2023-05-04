@@ -6,6 +6,7 @@
 
 "use strict";
 
+const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 
 //
@@ -40,7 +41,7 @@ function WritePostTags( PostTags ){
 	console.log( "PostTags.length", PostTags.length );
 	for( let i = 0; i < PostTags.length; i += 2 ){
 		console.log( i, PostTags[i], PostTags[i+1] );
-		// dbPublii.run( sSQLPostTags, [ PostTags[i], PostTags[i+1] ] );
+		dbPublii.run( sSQLPostTags, [ PostTags[i], PostTags[i+1] ] );
 	}
 
 	dbPublii.close();
@@ -49,78 +50,90 @@ function WritePostTags( PostTags ){
 //
 //  AddPostTags - Adds all the tags for a given report
 //
-//   sClassification - Classification code for report
+//   Classification code for reports (rows from report db)
 //
-function AddPostTags( ){
-	var dbReports = new sqlite3.Database('reports.sqlite')
+function AddPostTags( rowClassifications ){
 	var dbPublii = new sqlite3.Database('db.sqlite');
-
-	var sSQLClassification = "SELECT Classification FROM report;";
 	var sSQLPost = "SELECT id from posts WHERE slug = ?;";
 	var sSQLTag = "SELECT id from tags WHERE slug = ?;";
 	
 	var PostTags = [];				// Ordered list of TagId, PostIDs
 
 	//
-	//  For each report in reports db, get its classification code
+	//  Process the classification codes for each report
 	//
-	dbReports.each( sSQLClassification, [], (err, row) => {
+	for( let i=0; i < rowClassifications.length; i++ ){
+		let sClassification = rowClassifications[i].Classification;
+
 		//
-		//  Lookup the post in publii db
+		//  Look up the corresponding post in Publii db
 		//
-		dbPublii.get( sSQLPost, [ row.Classification ], (err, row) => {
+		dbPublii.get( sSQLPost, [ sClassification ], (err, row) => {
 			if( err ){
 				throw new Error( "Post not found for " + sClassification );
 			}
 
+			//
+			//  Find the tag according to the classification code
+			//
 			var idPost = row.id;
 			var sTagSlug = CreateSlug( GetTag( sClassification ) );
-			//
-			//  Lookup the tag for that post based on the classification code
-			//
+
 			dbPublii.get( sSQLTag, [ sTagSlug ], (err, row) => {
 				if( err ){
 					throw new Error( "Tag entry not found for " + sClassification );
 				}
 
 				//
-				// Now we have both IDs, link 'em
+				// Now we have both Punblii tag and post IDs, link 'em
+				// in our array
 				//
 				var idTag = row.id;
 				PostTags.push( idTag );
 				PostTags.push( idPost);
-				// console.log( sClassification, "tagID,PostID", idTag, idPost );
-
-				// dbPublii.run( sSQLPostTags, [ idTag, idPost ] );
 			});
 		});
-	});
+	}
 
 	//
-	//  Must wait for the dbs to close to complete before we can access the Data
+	//  Must wait for the close to complete before we can access the our array
 	//
-	dbReports.close((err) => { 
+	dbPublii.close((err) => {
 		if (err){
-			console.log(err.message);
+			  console.log(err.message);
 		}
-		dbPublii.close((err) => {
-			if (err){
-				console.log(err.message);
-			}
-			WritePostTags( PostTags );
-		});
+		WritePostTags( PostTags );  // Now we can write them out!
 	});
 }
 
 //
+//  dbCallback - function
+//  ----------
+//
+//  Callback for Database.each function
+//
+function dbCallback( err, rows ){
+	if( err ){
+		throw err;
+	}
+	AddPostTags( rows );
+}
+	
+//
 //  Main
 //  ----
 //
+let db = new sqlite3.Database('reports.sqlite')
+let sSQL = "SELECT Classification FROM report;"
+
 try {
-	AddPostTags();
+	// db.serialize();
+	db.all( sSQL, [], dbCallback );			// Process all items in db
 }
 catch( e ) {
 	console.error( e.name );
 	console.error( e.message );
 }
+
+db.close( );
 

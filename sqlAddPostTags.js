@@ -64,7 +64,7 @@ function AddPostTags( sClassification ){
 
 			setTimeout( () => {
 				dbPublii.run( sSQLPostTags, [ idTag, idPost ] );
-			}, 10 );
+			}, 1000 );
 		});
 	});
 }

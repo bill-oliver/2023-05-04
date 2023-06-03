@@ -62,9 +62,7 @@ function AddPostTags( sClassification ){
 			var idTag = row.id;
 			console.log( sClassification, "tagID,PostID", idTag, idPost );
 
-			setTimeout( () => {
-				dbPublii.run( sSQLPostTags, [ idTag, idPost ] );
-			}, 1000 );
+			dbPublii.run( sSQLPostTags, [ idTag, idPost ] );
 		});
 	});
 }
@@ -79,7 +77,9 @@ function dbCallback( err, row ){
 	if( err ){
 		throw err;
 	}
-	AddPostTags( row.Classification );
+	setTimeout( () => {
+		AddPostTags( row.Classification );
+	} , 100 );
 }
 	
 //

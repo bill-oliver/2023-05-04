@@ -16,6 +16,19 @@ const sPathMedia = "C:\\Users\\boliv\\OneDrive\\Documents\\Publii\\sites\\oliver
 const sPathImages = "C:\\Users\\boliv\\OneDrive\\Documents\\Projects\\Website\\2023-05-04\\Images\\";
 
 //
+//  CreateSlug - creates a valid slug from Classification code (can't have a dot)
+//  (also in sqlAddTags)
+//
+//  Code usually looks like 1.01, 12.08.  
+//  Replace the dot with an underscore (1_01, 12_08)
+//
+function CreateSlug( sCode ){
+	let iDot = sCode.indexOf( "." );
+	let sRet = sCode.slice( 0, iDot ) + "_" + sCode.slice( iDot+1 );
+	return sRet;
+}
+
+//
 //  CopyImage - copies and image file into the specified folder
 //
 function CopyImage( sFile, sPath ){
@@ -35,7 +48,8 @@ function CopyImage( sFile, sPath ){
 //
 function AddTagImages( sTag, sImageFile ){
 
-    dbPublii.get( "SELECT id FROM tags WHERE slug = ?", [sTag],
+    let sSlug = CreateSlug( sTag );
+    dbPublii.get( "SELECT id FROM tags WHERE slug = ?", [sSlug],
                     (err, row) => {
         if( err || row === null ){
             throw new Error( "No tag entry for" + sTag );

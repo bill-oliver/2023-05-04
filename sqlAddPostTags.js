@@ -62,9 +62,9 @@ function AddPostTags( sClassification ){
 			var idTag = row.id;
 			console.log( sClassification, "tagID,PostID", idTag, idPost );
 
-			var dbPublii2 = new sqlite3.Database('db.sqlite');
-			dbPublii2.run( sSQLPostTags, [ idTag, idPost ] );
-			dbPublii2.close();
+			setTimeout( () => {
+				dbPublii.run( sSQLPostTags, [ idTag, idPost ] );
+			}, 10 );
 		});
 	});
 }

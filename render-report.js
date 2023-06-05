@@ -107,51 +107,6 @@ const dataFields = {
 		"" ]
 }
 
-//
-//  cleanMDString - function  ***NOT NEEDED??***
-//  -------------
-//
-//  Cleans up the block of text retrieved by findSlice
-//  see https://www.markdownguide.org/basic-syntax/#escaping-characters
-//
-const restrictedChars = [     
-			"\\",			// backslash
-			"`",	 		// backtick 
-			"*",			// asterisk
-			"_",			// underscore
-			"{ }",		// 	curly braces
-			"[ ]",		// 	brackets
-			"< >",		// 	angle brackets
-			"( )",		// 	parentheses
-			"#",			// pound sign
-			"+",			// plus sign
-			"-",			// minus sign (hyphen)
-			".",			// dot
-			"!",			// exclamation mark
-			"|" ];		// pipe 
-
-function cleanString( sIn ){
-			
-	var sOut = "";
-
-	for( let i = 0; i < sIn.length; i++ ){
-		let sChar = sIn.charAt( i );
-		
-		for( let j = 0; j < restrictedChars.length; j++ ){
-			if ( sChar == restrictedChars[ j ] ){
-				sOut += '\\';           	// Escape the next character
-				console.log( sIn );
-				console.log( sOut );
-			}
-		}
-		
-		sOut += sChar;
-	}
-	// console.log( "sIn", sIn );
-	// console.log( "sOut", sOut );
-	
-	return sOut;
-}
 
 //
 //  updatePost - function
@@ -270,28 +225,45 @@ function addPost( sClass, sPage ){
 //  insertGallery - function
 //  -------------
 //
-//  Returns the html text to build a gallery containing the specified images.
+//  Returns the html text to build a gallery containing the images.
+//  No gallery is created if there is only 1 image.
 //
 //  Gallery code taken from html file created by wsw editor
 //
 //    ImagesFiles - Array with image information
 //
 function insertGallery( ImageFiles ){
+	let iImages = ImageFiles.length;
+	let sRet = "";
 
-	let sRet = '<div class="gallery gallery-wrapper--full" contenteditable="false" '
+	if( iImages > 1 ){
+		//
+		//  Insert the drop down details block heading
+		//
+		sRet = "\n\n<details>\n	<summary><b>Image Gallery (" + iImages + " Images)</b></summary>\n";
+
+		//
+		//  Start the Gallery
+		//
+		sRet += '<div class="gallery gallery-wrapper--full" contenteditable="false" '
 			+  'data-is-empty="false" data-translation="Add images" data-columns="6">\n';
 
-	for( let i=0; i<ImageFiles.length; i++ ){
-		let sFN = ImageFiles[i].get( "Fn" );
-		let iHt = ImageFiles[i].get( "Ht" );
-		let iWd = ImageFiles[i].get( "Wd" );
-		let sNoType = sFN.slice( 0, sFN.lastIndexOf(".") );
-		sRet += '<figure class="gallery__item"><a href="#DOMAIN_NAME#gallery/' + sFN 
-			 + '" data-size="' + iWd + "x" + iHt + '">' 
-			 + '<img src="#DOMAIN_NAME#gallery/' + sNoType + '-thumbnail.jpg" alt=""></a></figure>\n'; 
-	}
+		//
+		// Add the images
+		//
+		for( let i = 0; i < iImages; i++ ){
+			let sFN = ImageFiles[i].get( "Fn" );
+			let iHt = ImageFiles[i].get( "Ht" );
+			let iWd = ImageFiles[i].get( "Wd" );
+			let sNoType = sFN.slice( 0, sFN.lastIndexOf(".") );
+			sRet += '<figure class="gallery__item"><a href="#DOMAIN_NAME#gallery/' + sFN 
+				+ '" data-size="' + iWd + "x" + iHt + '">' 
+				+ '<img src="#DOMAIN_NAME#gallery/' + sNoType + '-thumbnail.jpg" alt=""></a></figure>\n'; 
+		}
 
-	sRet += "</div>\n";
+		sRet += "</div>\n";      	// Close the Gallery
+		sRet += "</details>\n\n";   	// End the details block
+	}
 
 	return sRet;
 }
@@ -309,13 +281,8 @@ function insertGallery( ImageFiles ){
 var sPage;                    //  Global string buffer for the rendered page
 
 function renderPage( m, imgs ){
-	// db.serialize();
-	
-	const sHead = "##### ";   // Use heading level 5 for section headers
-	const sGalleryBlock = "\n\n<details>\n	<summary>Images:</summary>\n";
-	const sDetailsBlock = "\n\n<details>\n	<summary>Details:</summary>\n\n";
-	const sEndBlock = "</details>\n"
 
+	const sHead = "##### ";   // Use heading level 5 for section headers
 
 	let sClassification = m.get( "Classification" );
 	
@@ -327,10 +294,10 @@ function renderPage( m, imgs ){
 		"** |**HHCC Classification Code:  " + m.get( "Classification" ) + "**|\n" +
 		"| ----------- | ----------- |\n" +
 		sHead + "Description:\n" + m.get( "Description" ) + "\n" +
+		"\n---\n" +
 
-		sGalleryBlock + insertGallery( imgs ) + sEndBlock +		// Gallery goes here
+		insertGallery( imgs ) +									// Optional gallery goes here
 
-		sDetailsBlock +														// Rest are "Details"
 		sHead + "Group:\n" + m.get( "Grp" ) + "\n\n" +
 		// sHead + "Last Modified:\n" + m.get( "LastModified" ) + "\n\n" +
 		// sHead + "Film Image:\n" + m.get( "FilmImage"  ) + "\n\n" +
@@ -367,8 +334,7 @@ function renderPage( m, imgs ){
 		sHead + "Tracking:\n" + m.get( "Tracking"  ) + "\n\n" +
 		sHead + "Bibliographic References:\n" + m.get( "BiblioRef"  ) + "\n\n" +
 		sHead + "Notes:\n" + m.get( "Notes"  ) + "\n\n" +
-		sHead + "Related Reports:\n" + m.get( "RelatedReports") + "\n" +
-		sEndBlock;                                                         // End of details
+		sHead + "Related Reports:\n" + m.get( "RelatedReports") + "\n";
 
 	// console.log( sPage );
 	// fs.writeFileSync( ".\\markdown\\" + m.get( "AccessionNo" ) + ".md", sPage );		// For Testing

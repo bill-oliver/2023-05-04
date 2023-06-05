@@ -1,5 +1,5 @@
 //
-//  Creates posts in Publii db from report data in report.db
+//  Creates or updates posts in Publii db from report data in report.db
 //
 //  title: classification Number (changed later)
 //  slug:  classification Number
@@ -14,6 +14,8 @@
 "use strict";
 
 var fs = require('fs');
+
+const bUpdateExisting = true;  // Set to false to generate new records
 
 //
 //  dataFields structure: Cross references fields in database with tokens in Report
@@ -152,15 +154,39 @@ function cleanString( sIn ){
 }
 
 //
-//  updatePublii - function
-//  ------------
+//  updatePost - function
+//  ----------
+//
+//  Updates the post in the publii db for a reserch report 
+//
+//  sClass - Classification Code (page slug)
+//  sPage - page text in Markdown
+// 
+function updatePost( sClass, sPage ){
+	var dbPublii = new sqlite3.Database('db.sqlite');  // Publii database  (make a copy!!!)
+
+	dbPublii.configure( "busyTimeout", 20000 );  // Keep SQLite from timing out
+
+	dbPublii.run( "UPDATE posts SET text = ? WHERE slug = ?;",
+	              [ sPage, sClass ], ( err ) => {
+		if( err )
+			throw err;
+		else { 
+			console.log( sClass, "updated" );
+		}
+	});
+}
+
+//
+//  addPost - function
+//  -------
 //
 //  Creates a new post in the publii db for a reserch report 
 //
 //  sClass - Classification Code (used as page title and slug)
 //  sPage - page text in Markdown
 // 
-function updatePublii( sClass, sPage ){
+function addPost( sClass, sPage ){
 	var dbPublii = new sqlite3.Database('db.sqlite');  // Publii database  (make a copy!!!)
 
 	var sSQLPost = "INSERT INTO posts( title, authors, slug, text, created_at, modified_at, status, template ) " +
@@ -346,7 +372,12 @@ function renderPage( m, imgs ){
 
 	// console.log( sPage );
 	// fs.writeFileSync( ".\\markdown\\" + m.get( "AccessionNo" ) + ".md", sPage );		// For Testing
-	updatePublii( m.get( "Classification" ), sPage );
+	if( bUpdateExisting ){
+		updatePost( m.get( "Classification" ), sPage );  // Update existing record
+	} 
+	else{
+		addPost( m.get( "Classification" ), sPage );	// Add new record
+	}
 }
 
 
